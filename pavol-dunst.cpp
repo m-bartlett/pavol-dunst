@@ -19,14 +19,13 @@
 #define ICON_PATH_VOLUME_MEDIUM        "/usr/share/icons/Papirus-Dark/symbolic/status/audio-volume-medium-symbolic.svg"
 #define ICON_PATH_VOLUME_HIGH          "/usr/share/icons/Papirus-Dark/symbolic/status/audio-volume-high-symbolic.svg"
 #define ICON_PATH_VOLUME_OVERAMPLIFIED "/usr/share/icons/Papirus-Dark/symbolic/status/audio-volume-overamplified-symbolic.svg"
-#define NOTIFICATION_BODY_WIDTH_MIN  2  // Width of notification body whitespace for non-overamplified volumes
-#define NOTIFICATION_BODY_WIDTH_MAX  10  // Increase width on overamplification
-#define NOTIFICATION_BODY_WIDTH_DELTA (NOTIFICATION_BODY_WIDTH_MAX - NOTIFICATION_BODY_WIDTH_MIN)
+#define NOTIFICATION_BODY_WIDTH_MIN  2  // Width of notification body whitespace for non-overamplified volumes 0-100
+#define NOTIFICATION_BODY_WIDTH_MAX  10 // Increase width on overamplification
 #define PULSEAUDIO_OVERAMPLIFIED_MAX 150
-#define PULSEAUDIO_OVERAMPLIFIED_MAX_OFFSET (PULSEAUDIO_OVERAMPLIFIED_MAX - 100)
 #define NOTIFICATION_TIMEOUT_MS 1000
 
-
+#define NOTIFICATION_BODY_WIDTH_DELTA (NOTIFICATION_BODY_WIDTH_MAX - NOTIFICATION_BODY_WIDTH_MIN)
+#define PULSEAUDIO_OVERAMPLIFIED_MAX_OFFSET (PULSEAUDIO_OVERAMPLIFIED_MAX - 100)
 #define NOTIFICATION_CATEGORY_LITERAL    "volume"
 #define NOTIFICATION_BODY_FORMAT_LITERAL "<span>%s</span>"
 #define SYNCHRONOUS_LITERAL              "synchronous"
