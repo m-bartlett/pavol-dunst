@@ -13,21 +13,28 @@
 #include <wchar.h>
 #include <stdint.h>
 
-// #define VOLUME_MUTE_SYMBOL_LITERAL "ﱝ"
-// // #define VOLUME_QUIET_SYMBOL_LITERAL "<span font_features=\"dlig=1, -kern, afrc on\">奄</span>"
-// #define VOLUME_QUIET_SYMBOL_LITERAL ""
-// #define VOLUME_NORMAL_SYMBOL_LITERAL ""
-// #define VOLUME_LOUD_SYMBOL_LITERAL ""
 
-#define VOLUME_MUTE_SYMBOL_LITERAL "🔇"
-#define VOLUME_QUIET_SYMBOL_LITERAL "🔈"
-#define VOLUME_NORMAL_SYMBOL_LITERAL "🔉"
-#define VOLUME_LOUD_SYMBOL_LITERAL "🔊"
-
+#define ICON_PATH_VOLUME_MUTED         "/usr/share/icons/Papirus-Dark/symbolic/status/audio-volume-muted-symbolic.svg"
+#define ICON_PATH_VOLUME_LOW           "/usr/share/icons/Papirus-Dark/symbolic/status/audio-volume-low-symbolic.svg"
+#define ICON_PATH_VOLUME_MEDIUM        "/usr/share/icons/Papirus-Dark/symbolic/status/audio-volume-medium-symbolic.svg"
+#define ICON_PATH_VOLUME_HIGH          "/usr/share/icons/Papirus-Dark/symbolic/status/audio-volume-high-symbolic.svg"
+#define ICON_PATH_VOLUME_OVERAMPLIFIED "/usr/share/icons/Papirus-Dark/symbolic/status/audio-volume-overamplified-symbolic.svg"
+#define NOTIFICATION_BODY_WIDTH_MIN  2  // Width of notification body whitespace for non-overamplified volumes
+#define NOTIFICATION_BODY_WIDTH_MAX  10  // Increase width on overamplification
+#define NOTIFICATION_BODY_WIDTH_DELTA (NOTIFICATION_BODY_WIDTH_MAX - NOTIFICATION_BODY_WIDTH_MIN)
+#define PULSEAUDIO_OVERAMPLIFIED_MAX 150
+#define PULSEAUDIO_OVERAMPLIFIED_MAX_OFFSET (PULSEAUDIO_OVERAMPLIFIED_MAX - 100)
 #define NOTIFICATION_TIMEOUT_MS 1000
-#define NOTIFICATION_CATEGORY_LITERAL "volume"
-#define SYNCHRONOUS_LITERAL "synchronous"
-#define NOTIFICATION_HINT_VALUE_LITERAL "value"
+
+
+#define NOTIFICATION_CATEGORY_LITERAL    "volume"
+#define NOTIFICATION_BODY_FORMAT_LITERAL "<span>%s</span>"
+#define SYNCHRONOUS_LITERAL              "synchronous"
+#define NOTIFICATION_HINT_VALUE_LITERAL  "value"
+
+
+const char *NOTIFICATION_BODY_FORMAT = NOTIFICATION_BODY_FORMAT_LITERAL;
+size_t NOTIFICATION_BODY_FORMAT_LENGTH = strlen(NOTIFICATION_BODY_FORMAT);
 
 
 static pa_mainloop *mainloop = NULL;
@@ -43,6 +50,10 @@ typedef struct Command {
   bool is_mute_toggle;
   bool is_snoop;
   int volume;
+  char *icon_muted;
+  char *icon_low;
+  char *icon_medium;
+  char *icon_high;
 } Command;
 
 
@@ -81,6 +92,8 @@ set_volume( pa_context *c,
     command->volume
   );
 
+  if (new_volume > PULSEAUDIO_OVERAMPLIFIED_MAX) new_volume = PULSEAUDIO_OVERAMPLIFIED_MAX;
+
   pa_cvolume *new_cvolume = (
     pa_cvolume_set(
       cvolume,
@@ -100,10 +113,10 @@ static void get_server_info( __attribute__((unused)) pa_context *c,
 }
 
 
-static void print_volume( __attribute__((unused)) pa_context *c,
-                          const pa_sink_info *i,
-                          __attribute__((unused)) int eol,
-                           void *userdata                        ) {
+static void display_volume( __attribute__((unused)) pa_context *c,
+                            const pa_sink_info *i,
+                            __attribute__((unused)) int eol,
+                             void *userdata                        ) {
   if (i == NULL) return;
 
   Command *command = (Command *) userdata;
@@ -114,22 +127,38 @@ static void print_volume( __attribute__((unused)) pa_context *c,
   printf("\n");
   fflush(stdout);
 
-  char *summary = (char*)NOTIFICATION_CATEGORY_LITERAL;
-  char *body;
+  uint8_t body_width = NOTIFICATION_BODY_WIDTH_MIN;
 
-  if (i->mute) body = (char*) u8"" VOLUME_MUTE_SYMBOL_LITERAL;
+  if (volume > 100) {
+    body_width += ( (volume - 100) * NOTIFICATION_BODY_WIDTH_DELTA ) / PULSEAUDIO_OVERAMPLIFIED_MAX_OFFSET;
+  }
+
+  char body_space[body_width+1];
+  memset(body_space, ' ', body_width);
+  body_space[body_width] = '\0';
+  body_width += NOTIFICATION_BODY_FORMAT_LENGTH;
+  char body[body_width+1];
+  sprintf(body, NOTIFICATION_BODY_FORMAT, body_space);
+  body[body_width]='\0';
+  printf("yeehaw '%s'\n", body_space);
+  printf("yeehaw2 '%s'\n", body);
+
+  char *summary = (char*)NOTIFICATION_CATEGORY_LITERAL;
+  char *icon;
+
+  if (i->mute) {icon = (char*)command->icon_muted; printf("nice\n");}
   else {
     uint8_t loudness = volume/33;
     switch(loudness) {
-      case 0: body = (char*) u8"" VOLUME_QUIET_SYMBOL_LITERAL; break;
-      case 1: body = (char*) u8"" VOLUME_NORMAL_SYMBOL_LITERAL; break;
+      case 0: icon = (char*)command->icon_low; break;
+      case 1: icon = (char*)command->icon_medium; break;
       case 2:
-      default: body = (char*) u8"" VOLUME_LOUD_SYMBOL_LITERAL; break;
+      default: icon = (char*)command->icon_high; break;
     }
   }
 
   notify_init(summary);
-  NotifyNotification *notification = notify_notification_new(summary, body, NULL);
+  NotifyNotification *notification = notify_notification_new(summary, body, icon);
   notify_notification_set_category(notification, NOTIFICATION_CATEGORY_LITERAL);
 
   /*
@@ -185,9 +214,19 @@ quit(int new_retval) {
 }
 
 
-static int usage() {
-  fprintf(stderr, "pavolumenotify [-h] [-m [on|off|toggle] [-v [+|-]number]\n");
+static int usage(char *argv[]) {
+  fprintf(stderr, "%s [-h] [-m [on|off|toggle] [-v [+|-]number]\n", argv[0]);
   return quit(EXIT_FAILURE);
+}
+
+static bool parse_volume_argument(char *optarg, struct Command &command) {
+  command.volume = (int) strtol(optarg, NULL, 10);
+  if (command.volume == 0 && '0' != optarg[0]) {
+    // `strtol` defaults to 0 if it errors. If the string isn't literally '0', assume there's an error.
+    return FALSE;
+  }
+  if (optarg[0] == '-' || optarg[0] == '+') command.is_delta_volume = true;
+  return TRUE;
 }
 
 
@@ -205,6 +244,10 @@ int main(int argc, char *argv[]) {
     .is_mute_toggle = false,
     .is_snoop = false,
     .volume = -1,
+    .icon_muted  = (char*)ICON_PATH_VOLUME_MUTED,
+    .icon_low    = (char*)ICON_PATH_VOLUME_LOW,
+    .icon_medium = (char*)ICON_PATH_VOLUME_MEDIUM,
+    .icon_high   = (char*)ICON_PATH_VOLUME_HIGH,
   };
 
 
@@ -219,40 +262,50 @@ int main(int argc, char *argv[]) {
       - else: getopt_long() returns 0, and flag points to a variable which is set to val if the option is found, but left unchanged if the option is not found.
     - return_val: value to return, or to load into the variable pointed to by flag.
   */
-
   static const struct option long_options[] = {
-    {"help",   0, NULL, 'h'},
-    {"volume", 1, NULL, 'v'},
-    {"mute",   1, NULL, 'm'},
+    {"help",        /*has_arg=*/no_argument,       /*flag=*/NULL, /*return_val=*/'h'},
+    {"volume",      /*has_arg=*/required_argument, /*flag=*/NULL, /*return_val=*/'v'},
+    {"mute",        /*has_arg=*/required_argument, /*flag=*/NULL, /*return_val=*/'m'},
+    {"icon-mute",   /*has_arg=*/required_argument, /*flag=*/NULL, /*return_val=*/'X'},
+    {"icon-low",    /*has_arg=*/required_argument, /*flag=*/NULL, /*return_val=*/'L'},
+    {"icon-medium", /*has_arg=*/required_argument, /*flag=*/NULL, /*return_val=*/'M'},
+    {"icon-high",   /*has_arg=*/required_argument, /*flag=*/NULL, /*return_val=*/'H'},
     {NULL,     0, NULL, 0}  // Must have a null entry to terminate the array
   };
 
   int opt;
-  while ((opt = getopt_long(argc, argv, "-hm:v:", long_options, NULL) ) != -1) {
+  while ((opt = getopt_long(argc, argv, "-hv:m:X:L:M:H:", long_options, NULL) ) != -1) {
     switch (opt) {
-      case 'h': // help
-        return usage();
-      case 'm': // mute
+
+      case 'h'/*elp*/: return usage(argv);
+
+      case 'm'/*ute*/:
         command.is_mute_off = strcmp("off", optarg) == 0;
         command.is_mute_on = strcmp("on", optarg) == 0;
         command.is_mute_toggle = strcmp("toggle", optarg) == 0;
-        if (!(command.is_mute_off || command.is_mute_on || command.is_mute_toggle)) {
-          return usage();
-        }
+        if (!(command.is_mute_off || command.is_mute_on || command.is_mute_toggle)) return usage(argv);
         break;
-      case 'v': //volume
-        command.volume = (int) strtol(optarg, NULL, 10);
-        if (command.volume == 0 && '0' != optarg[0]) {
-          // If `strtol` converted the `optarg` to 0, but the argument didn't begin with a '0'
-          // then it must not have been numeric.
-          return usage();
-        }
-        if (optarg[0] == '-' || optarg[0] == '+') command.is_delta_volume = true;
+
+      case 'v'/*olume*/:
+        if (!parse_volume_argument(optarg, command)) return usage(argv);
         break;
+
+      case 'X': command.icon_muted  = optarg; break;
+      case 'L': command.icon_low    = optarg; break;
+      case 'M': command.icon_medium = optarg; break;
+      case 'H': command.icon_high   = optarg; break;
+
       default:
-        return usage();
+        // Positional argument, parse as volume modification
+        if (!parse_volume_argument(optarg, command)) return usage(argv);
     }
   }
+
+  for (char **positional = &argv[optind]; *positional; positional++) {
+    // Positional arguments proceeding '--', also parse these as volume modifications
+    if (!parse_volume_argument(*positional, command)) return usage(argv);
+  }
+
 
   mainloop = pa_mainloop_new();
   if (!mainloop) {
@@ -275,7 +328,7 @@ int main(int argc, char *argv[]) {
   char *default_sink_name[256];
   wait_loop(pa_context_get_server_info(context, get_server_info, &default_sink_name));
   wait_loop(pa_context_get_sink_info_by_name(context, (char *) default_sink_name, set_volume, &command));
-  wait_loop(pa_context_get_sink_info_by_name(context, (char *) default_sink_name, print_volume, &command));
+  wait_loop(pa_context_get_sink_info_by_name(context, (char *) default_sink_name, display_volume, &command));
 
   return quit(retval);
 }
