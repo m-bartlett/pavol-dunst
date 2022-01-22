@@ -13,12 +13,12 @@
 #include <wchar.h>
 #include <stdint.h>
 
-
 #define ICON_PATH_VOLUME_MUTED         "/usr/share/icons/Papirus-Dark/symbolic/status/audio-volume-muted-symbolic.svg"
 #define ICON_PATH_VOLUME_LOW           "/usr/share/icons/Papirus-Dark/symbolic/status/audio-volume-low-symbolic.svg"
 #define ICON_PATH_VOLUME_MEDIUM        "/usr/share/icons/Papirus-Dark/symbolic/status/audio-volume-medium-symbolic.svg"
 #define ICON_PATH_VOLUME_HIGH          "/usr/share/icons/Papirus-Dark/symbolic/status/audio-volume-high-symbolic.svg"
 #define ICON_PATH_VOLUME_OVERAMPLIFIED "/usr/share/icons/Papirus-Dark/symbolic/status/audio-volume-overamplified-symbolic.svg"
+
 #define NOTIFICATION_BODY_WIDTH_MIN  2  // Width of notification body whitespace for non-overamplified volumes 0-100
 #define NOTIFICATION_BODY_WIDTH_MAX  10 // Increase width on overamplification
 #define PULSEAUDIO_OVERAMPLIFIED_MAX 150
@@ -139,8 +139,6 @@ static void display_volume( __attribute__((unused)) pa_context *c,
   char body[body_width+1];
   sprintf(body, NOTIFICATION_BODY_FORMAT, body_space);
   body[body_width]='\0';
-  printf("yeehaw '%s'\n", body_space);
-  printf("yeehaw2 '%s'\n", body);
 
   char *summary = (char*)NOTIFICATION_CATEGORY_LITERAL;
   char *icon;

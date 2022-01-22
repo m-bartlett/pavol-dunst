@@ -21,7 +21,7 @@ debug: $(TARGET)
 $(TARGET):
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $@.cpp $(LIBS)
 
-install:
+install: $(TARGET)
 	install -m 755 -D --target-directory "$(BINPREFIX)" "$(TARGET)"
 
 uninstall:
@@ -30,5 +30,5 @@ uninstall:
 clean:
 	rm -f $(TARGET) $(OBJECTS)
 
-.PHONY: all debug default install uninstall clean
+.PHONY: debug default uninstall clean
 # .PRECIOUS: $(TARGET) $(OBJECTS)
