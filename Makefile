@@ -6,20 +6,21 @@ LDFLAGS += -L$(PREFIX)/lib
 
 LIBS     = -lm -lpulse
 LIBS		 += $(shell pkg-config --libs libnotify)
-TARGET   = pavol-dunst
+TARGET   := pavol-dunst
 
 PREFIX    ?= /usr/local
 BINPREFIX  = $(PREFIX)/bin
 
-OBJECTS = $(patsubst %.cpp, %.o, $(wildcard *.cpp))
+SOURCES = $(wildcard *.cpp)
+OBJECTS = $(patsubst %.cpp, %.o, $(SOURCES))
 
 all: clean $(TARGET)
 
 debug: CFLAGS += -O0 -g
 debug: $(TARGET)
 
-$(TARGET):
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $@.cpp $(LIBS)
+$(TARGET): $(SOURCES)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $@.cpp $(LIBS) -O3
 
 install: $(TARGET)
 	install -m 755 -D --target-directory "$(BINPREFIX)" "$(TARGET)"

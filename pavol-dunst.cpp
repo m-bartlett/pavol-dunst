@@ -22,6 +22,7 @@
 #define NOTIFICATION_BODY_WIDTH_MIN  2  // Width of notification body whitespace for non-overamplified volumes 0-100
 #define NOTIFICATION_BODY_WIDTH_MAX  10 // Increase width on overamplification
 #define PULSEAUDIO_OVERAMPLIFIED_MAX 150
+#define PULSEAUDIO_OVERAMPLIFIED_RANGE (PULSEAUDIO_OVERAMPLIFIED_MAX - 100)
 #define NOTIFICATION_TIMEOUT_MS 1000
 
 #define NOTIFICATION_BODY_WIDTH_DELTA (NOTIFICATION_BODY_WIDTH_MAX - NOTIFICATION_BODY_WIDTH_MIN)
@@ -41,6 +42,7 @@ static pa_mainloop_api *mainloop_api = NULL;
 static pa_context *context = NULL;
 int retval = EXIT_SUCCESS;
 
+
 typedef struct Command {
   char *format;
   bool is_delta_volume;
@@ -53,6 +55,7 @@ typedef struct Command {
   char *icon_low;
   char *icon_medium;
   char *icon_high;
+  char *icon_overamplified;
 } Command;
 
 
@@ -64,19 +67,20 @@ static void wait_loop(pa_operation *op) {
 
 static int constrain_volume(int volume) { if (volume < 0) return 0; return volume; }
 static int normalize(pa_volume_t volume) { return (int) round(volume * 100.0 / PA_VOLUME_NORM); }
-static pa_volume_t denormalize(int volume) { return (pa_volume_t) round(volume * PA_VOLUME_NORM / 100); }
+static pa_volume_t denormalize(int volume) {
+  return (pa_volume_t) round(volume * PA_VOLUME_NORM / 100);
+}
 
-static void
-set_volume( pa_context *c,
-            const pa_sink_info *i,
-            __attribute__((unused)) int eol,
-            void *userdata
-          ) {
+
+static void set_volume( pa_context *c,
+                        const pa_sink_info *i,
+                        __attribute__((unused)) int eol,
+                        void *userdata ) {
   if (i == NULL) return;
 
   Command *command = (Command *) userdata;
-  if (command->is_mute_on)  pa_context_set_sink_mute_by_index(c, i->index, 1, NULL, NULL);
-  if (command->is_mute_off) pa_context_set_sink_mute_by_index(c, i->index, 0, NULL, NULL);
+  if (command->is_mute_on)     pa_context_set_sink_mute_by_index(c, i->index, 1, NULL, NULL);
+  if (command->is_mute_off)    pa_context_set_sink_mute_by_index(c, i->index, 0, NULL, NULL);
   if (command->is_mute_toggle) pa_context_set_sink_mute_by_index(c, i->index, !i->mute, NULL, NULL);
   if (command->volume == -1 && !command->is_delta_volume) return;
 
@@ -85,11 +89,8 @@ set_volume( pa_context *c,
     // pa_context_set_sink_mute_by_index(c, i->index, 0, NULL, NULL);
 
   pa_cvolume *cvolume = (pa_cvolume*)&i->volume;
-  int new_volume = (
-    command->is_delta_volume ?
-    normalize(pa_cvolume_avg(cvolume)) + command->volume :
-    command->volume
-  );
+  int old_volume = normalize(pa_cvolume_avg(cvolume));
+  int new_volume = command->is_delta_volume ? old_volume + command->volume : command->volume;
 
   if (new_volume > PULSEAUDIO_OVERAMPLIFIED_MAX) new_volume = PULSEAUDIO_OVERAMPLIFIED_MAX;
 
@@ -112,10 +113,10 @@ static void get_server_info( __attribute__((unused)) pa_context *c,
 }
 
 
-static void display_volume( __attribute__((unused)) pa_context *c,
-                            const pa_sink_info *i,
-                            __attribute__((unused)) int eol,
-                             void *userdata                        ) {
+static void display_volume_notification( __attribute__((unused)) pa_context *c,
+                                         const pa_sink_info *i,
+                                         __attribute__((unused)) int eol,
+                                         void *userdata ) {
   if (i == NULL) return;
 
   Command *command = (Command *) userdata;
@@ -143,20 +144,25 @@ static void display_volume( __attribute__((unused)) pa_context *c,
   char *summary = (char*)NOTIFICATION_CATEGORY_LITERAL;
   char *icon;
 
-  if (i->mute) {icon = (char*)command->icon_muted; printf("nice\n");}
+  if (i->mute) icon = (char*)command->icon_muted;
+  else if (volume > 100) {
+    icon = command->icon_overamplified;
+    volume = (volume % 100) * 100 / PULSEAUDIO_OVERAMPLIFIED_RANGE;
+  }
   else {
     uint8_t loudness = volume/33;
     switch(loudness) {
-      case 0: icon = (char*)command->icon_low; break;
-      case 1: icon = (char*)command->icon_medium; break;
+      case 0:  icon = (char*)command->icon_low;    break;
+      case 1:  icon = (char*)command->icon_medium; break;
       case 2:
-      default: icon = (char*)command->icon_high; break;
+      default: icon = (char*)command->icon_high;   break;
     }
   }
 
   notify_init(summary);
   NotifyNotification *notification = notify_notification_new(summary, body, icon);
   notify_notification_set_category(notification, NOTIFICATION_CATEGORY_LITERAL);
+  notify_notification_set_timeout(notification, NOTIFICATION_TIMEOUT_MS);
 
   /*
     https://people.gnome.org/~desrt/glib-docs/glib-GVariant.html
@@ -164,21 +170,16 @@ static void display_volume( __attribute__((unused)) pa_context *c,
   */
 
   // Set notification synchronous (overwrite existing notification instead of making a fresh one)
-  notify_notification_set_hint(
-    notification,
-    SYNCHRONOUS_LITERAL,
-    g_variant_new_string(NOTIFICATION_CATEGORY_LITERAL)
-  );
+  notify_notification_set_hint( notification,
+                                SYNCHRONOUS_LITERAL,
+                                g_variant_new_string(NOTIFICATION_CATEGORY_LITERAL) );
 
-  // Add 'value' hint for dunst progress bar to show
-  notify_notification_set_hint(
-    notification,
-    NOTIFICATION_HINT_VALUE_LITERAL,
-    g_variant_new_int32(volume)
-  );
-
-  notify_notification_set_timeout(notification, NOTIFICATION_TIMEOUT_MS);
+  // Add 'value' hint for dunst progress bar to show new volume
+  notify_notification_set_hint( notification,
+                                NOTIFICATION_HINT_VALUE_LITERAL,
+                                g_variant_new_int32(volume) );
   notify_notification_show(notification, NULL);
+
   g_object_unref(notification);
   notify_uninit();
 }
@@ -241,10 +242,11 @@ int main(int argc, char *argv[]) {
     .is_mute_toggle = false,
     .is_snoop = false,
     .volume = -1,
-    .icon_muted  = (char*)ICON_PATH_VOLUME_MUTED,
-    .icon_low    = (char*)ICON_PATH_VOLUME_LOW,
-    .icon_medium = (char*)ICON_PATH_VOLUME_MEDIUM,
-    .icon_high   = (char*)ICON_PATH_VOLUME_HIGH,
+    .icon_muted         = (char*)ICON_PATH_VOLUME_MUTED,
+    .icon_low           = (char*)ICON_PATH_VOLUME_LOW,
+    .icon_medium        = (char*)ICON_PATH_VOLUME_MEDIUM,
+    .icon_high          = (char*)ICON_PATH_VOLUME_HIGH,
+    .icon_overamplified = (char*)ICON_PATH_VOLUME_OVERAMPLIFIED,
   };
 
 
@@ -260,18 +262,19 @@ int main(int argc, char *argv[]) {
     - return_val: value to return, or to load into the variable pointed to by flag.
   */
   static const struct option long_options[] = {
-    {"help",        /*has_arg=*/no_argument,       /*flag=*/NULL, /*return_val=*/'h'},
-    {"volume",      /*has_arg=*/required_argument, /*flag=*/NULL, /*return_val=*/'v'},
-    {"mute",        /*has_arg=*/required_argument, /*flag=*/NULL, /*return_val=*/'m'},
-    {"icon-mute",   /*has_arg=*/required_argument, /*flag=*/NULL, /*return_val=*/'X'},
-    {"icon-low",    /*has_arg=*/required_argument, /*flag=*/NULL, /*return_val=*/'L'},
-    {"icon-medium", /*has_arg=*/required_argument, /*flag=*/NULL, /*return_val=*/'M'},
-    {"icon-high",   /*has_arg=*/required_argument, /*flag=*/NULL, /*return_val=*/'H'},
+    {"help",               /*has_arg=*/no_argument,       /*flag=*/NULL, /*return_val=*/'h'},
+    {"mute",               /*has_arg=*/required_argument, /*flag=*/NULL, /*return_val=*/'m'},
+    {"volume",             /*has_arg=*/required_argument, /*flag=*/NULL, /*return_val=*/'v'},
+    {"icon-mute",          /*has_arg=*/required_argument, /*flag=*/NULL, /*return_val=*/'X'},
+    {"icon-low",           /*has_arg=*/required_argument, /*flag=*/NULL, /*return_val=*/'L'},
+    {"icon-medium",        /*has_arg=*/required_argument, /*flag=*/NULL, /*return_val=*/'M'},
+    {"icon-high",          /*has_arg=*/required_argument, /*flag=*/NULL, /*return_val=*/'H'},
+    {"icon-overamplified", /*has_arg=*/required_argument, /*flag=*/NULL, /*return_val=*/'O'},
     {NULL,     0, NULL, 0}  // Must have a null entry to terminate the array
   };
 
   int opt;
-  while ((opt = getopt_long(argc, argv, "-hv:m:X:L:M:H:", long_options, NULL) ) != -1) {
+  while ((opt = getopt_long(argc, argv, "-hv:m:X:L:M:H:O:", long_options, NULL) ) != -1) {
     switch (opt) {
 
       case 'h'/*elp*/: return usage(argv);
@@ -287,10 +290,11 @@ int main(int argc, char *argv[]) {
         if (!parse_volume_argument(optarg, command)) return usage(argv);
         break;
 
-      case 'X': command.icon_muted  = optarg; break;
-      case 'L': command.icon_low    = optarg; break;
-      case 'M': command.icon_medium = optarg; break;
-      case 'H': command.icon_high   = optarg; break;
+      case 'X': command.icon_muted         = optarg; break;
+      case 'L': command.icon_low           = optarg; break;
+      case 'M': command.icon_medium        = optarg; break;
+      case 'H': command.icon_high          = optarg; break;
+      case 'O': command.icon_overamplified = optarg; break;
 
       default:
         // Positional argument, parse as volume modification
@@ -323,9 +327,15 @@ int main(int argc, char *argv[]) {
   }
 
   char *default_sink_name[256];
+  int new_volume;
   wait_loop(pa_context_get_server_info(context, get_server_info, &default_sink_name));
-  wait_loop(pa_context_get_sink_info_by_name(context, (char *) default_sink_name, set_volume, &command));
-  wait_loop(pa_context_get_sink_info_by_name(context, (char *) default_sink_name, display_volume, &command));
-
+  wait_loop(pa_context_get_sink_info_by_name( context,
+                                              (char *) default_sink_name,
+                                              set_volume,
+                                              &command ) );
+  wait_loop(pa_context_get_sink_info_by_name( context,
+                                              (char *) default_sink_name,
+                                              display_volume_notification,
+                                              &command ) );
   return quit(retval);
 }
