@@ -4,7 +4,7 @@ CFLAGS  += -D_POSIX_C_SOURCE=200112L
 CFLAGS  += $(shell pkg-config --cflags libnotify)
 LDFLAGS += -L$(PREFIX)/lib
 
-LIBS     = -lm -lpulse
+LIBS     = -lm -lpulse -lX11
 LIBS		 += $(shell pkg-config --libs libnotify)
 TARGET   := pavol-dunst
 
@@ -12,15 +12,19 @@ PREFIX    ?= /usr/local
 BINPREFIX  = $(PREFIX)/bin
 
 SOURCES = $(wildcard *.cpp)
-OBJECTS = $(patsubst %.cpp, %.o, $(SOURCES))
+OBJECTS = $(SOURCES:.cpp=.o)
 
-all: clean $(TARGET)
+
+all: $(TARGET)
 
 debug: CFLAGS += -O0 -g
 debug: $(TARGET)
 
-$(TARGET): $(SOURCES)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $@.cpp $(LIBS) -O3
+$(TARGET): $(OBJECTS)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) $(OBJECTS) -o $@ -O3
+
+$(OBJECTS): $(SOURCES)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) -c $?
 
 install: $(TARGET)
 	install -m 755 -D --target-directory "$(BINPREFIX)" "$(TARGET)"
