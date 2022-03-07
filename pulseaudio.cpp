@@ -8,6 +8,7 @@ pa_mainloop_api *mainloop_api = NULL;
 pa_context *context           = NULL;
 int pa_retval                 = EXIT_SUCCESS;
 
+
 int pulseaudio_init_context(pa_context *context, int pa_retval) {
   pa_context_connect(context, NULL, PA_CONTEXT_NOFLAGS, NULL);
   pa_context_state_t state;

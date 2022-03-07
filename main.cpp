@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
     .volume_delta         = false,
     .mute                 = MUTE_UNKNOWN,
     .notification_timeout = 1000,
-    .notification_body    = NULL,
+    .notification_body    = (char*)"",
     .icon_muted           = NULL,
     .icon_low             = NULL,
     .icon_medium          = NULL,
@@ -123,6 +123,11 @@ int main(int argc, char *argv[]) {
   for (char **positional = &argv[optind]; *positional; positional++) {
     // Positional arguments proceeding '--', also parse these as volume modifications
     if (!parse_volume_argument(*positional, userdata)) return usage(argv);
+  }
+
+  if (userdata.volume == -1) {
+    userdata.volume = 0;
+    userdata.volume_delta = true;
   }
 
 

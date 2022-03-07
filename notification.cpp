@@ -29,7 +29,7 @@ void display_volume_notification(userdata_t *userdata) {
     }
   }
 
-  uint16_t body_width = NOTIFICATION_BODY_FORMAT_SIZE + strlen(userdata->notification_body);
+  size_t body_width = NOTIFICATION_BODY_FORMAT_SIZE + strlen(userdata->notification_body);
   char body[body_width+1];
   sprintf(body, NOTIFICATION_BODY_FORMAT, userdata->notification_body);
 

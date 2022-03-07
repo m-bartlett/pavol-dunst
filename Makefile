@@ -24,7 +24,7 @@ $(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) $(OBJECTS) -o $@ -O3
 
 $(OBJECTS): $(SOURCES)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) -c $?
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) -c $^
 
 install: $(TARGET)
 	install -m 755 -D --target-directory "$(BINPREFIX)" "$(TARGET)"
