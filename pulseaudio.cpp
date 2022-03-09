@@ -85,24 +85,32 @@ void set_volume_callback( pa_context *context,
 
   pa_cvolume *cvolume = (pa_cvolume*)&sink_info->volume;
   int old_volume = normalize(pa_cvolume_avg(cvolume));
+
+  /* Return current volume for display if no volume argument was provided
+     Setting an absolute negative volume would be undefined behavior anyway. */
+  if (userdata->volume < 0 && !userdata->volume_delta) {
+    userdata->new_volume = old_volume;
+    return;
+  }
+
   int new_volume;
   if (userdata->volume_delta) new_volume = old_volume + userdata->volume;
   else                        new_volume = userdata->volume;
 
   if (new_volume > PULSEAUDIO_OVERAMPLIFIED_MAX) new_volume = PULSEAUDIO_OVERAMPLIFIED_MAX;
+  else if (new_volume < 0)                       new_volume = 0;
 
   userdata->new_volume = new_volume;
 
   pa_cvolume *new_cvolume = pa_cvolume_set( cvolume,
                                             sink_info->volume.channels,
-                                            denormalize(constrain_volume(new_volume)));
-
+                                            denormalize(constrain_volume(new_volume)) );
   pa_context_set_sink_volume_by_index(context, sink_info->index, new_cvolume, NULL, NULL);
 }
 
 void get_server_info_callback( __attribute__((unused)) pa_context *context,
-                                      const pa_server_info *sink_info,
-                                      void *userdata ) {
+                               const pa_server_info *sink_info,
+                               void *userdata ) {
   if (sink_info == NULL) return;
   strncpy((char*)userdata, sink_info->default_sink_name, 255);
 }

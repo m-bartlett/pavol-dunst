@@ -1,8 +1,13 @@
+#ifndef PROCESSMUTEX_H
+#define PROCESSMUTEX_H
+
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
-int get_shmid(char *shm_path, int project_id);
-bool process_mutex_lock(int shmid);
-int process_mutex_unlock(int shmid);
+void process_mutex_lock();
+void process_mutex_unlock();
+
+#endif

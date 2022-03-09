@@ -1,28 +1,22 @@
-// #include "Xresources.h"
+#include "Xresources.h"
 
-// void read_xresource_value(char *key, char* retval) {
+static int screen;
+static xcb_connection_t *conn;
+static xcb_xrm_database_t *xdatabase;
 
-//   Display *display = XOpenDisplay(NULL);
-//   if (!display) { fprintf(stderr, "Error opening display\n"); exit(EXIT_FAILURE); }
+void Xresource_init() {
+  conn = xcb_connect(NULL, &screen);
+  xdatabase = xcb_xrm_database_from_default(conn);
+}
 
-//   char *resource_manager;
-//   char *type;
-//   XrmDatabase db;
-//   XrmValue ret;
-//   XrmInitialize();
-//   resource_manager = XResourceManagerString(display);
-//   if (resource_manager == NULL) {
-//     fprintf(stderr, "Error loading resource manager\n");
-//     exit(EXIT_FAILURE);
-//   }
+void Xresource_close() {
+  xcb_xrm_database_free(xdatabase);
+  xcb_disconnect(conn);
+}
 
-//   db = XrmGetStringDatabase(resource_manager);
-
-//   #define XRESOURCE_LOAD_STRING(NAME, DST) \
-//     XrmGetResource(db, NAME, NAME, &type, &ret); \
-//     if (ret.addr != NULL && !strncmp("String", type, 64)) DST = (char*)ret.addr;
-
-//   XRESOURCE_LOAD_STRING(XRESOURCE_ICON_THEME_PATH, icon_theme_path);
-
-//   printf("%s = %s\n", XRESOURCE_ICON_THEME_PATH, icon_theme_path);
-// }
+char* Xresource_get(char* key) {
+  static char* value;
+  int val = xcb_xrm_resource_get_string(xdatabase, key, NULL, &value);
+  if (val == 0) return value;
+  return (char*)"a";
+}

@@ -28,12 +28,12 @@ int normalize(pa_volume_t volume);
 pa_volume_t denormalize(int volume);
 
 void set_volume_callback( pa_context *context,
-                                 const pa_sink_info *sink_info,
-                                 __attribute__((unused)) int eol,
-                                 void *userdata );
+                          const pa_sink_info *sink_info,
+                          __attribute__((unused)) int eol,
+                          void *userdata );
 
 void get_server_info_callback( __attribute__((unused)) pa_context *context,
-                                      const pa_server_info *sink_info,
-                                      void *userdata );
+                               const pa_server_info *sink_info,
+                               void *userdata );
 
 #endif

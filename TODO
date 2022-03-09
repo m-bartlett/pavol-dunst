@@ -1,4 +1,5 @@
 [x] overamplification icon + looping progress bar
+[x] Use shared memory as process lock to prevent multiple processes
 [ ] Xresources for icon paths for light vs dark
 [ ] Xresources for whether it's currently a light or dark theme
-[ ] Use UNIX socket as process lock to prevent multiple processes
+[ ] icon size Xresource & flag to resample pixbuf

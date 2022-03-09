@@ -3,7 +3,7 @@
 #include "pulseaudio.h"
 
 const char* NOTIFICATION_BODY_FORMAT = NOTIFICATION_LITERAL_BODY_FORMAT;
-const int NOTIFICATION_BODY_FORMAT_SIZE = strlen(NOTIFICATION_BODY_FORMAT) - 2;
+const int   NOTIFICATION_BODY_FORMAT_SIZE = strlen(NOTIFICATION_BODY_FORMAT) - 2;
 
 void display_volume_notification(userdata_t *userdata) {
   int volume = userdata->new_volume;
@@ -29,8 +29,8 @@ void display_volume_notification(userdata_t *userdata) {
     }
   }
 
-  size_t body_width = NOTIFICATION_BODY_FORMAT_SIZE + strlen(userdata->notification_body);
-  char body[body_width+1];
+  size_t body_width = NOTIFICATION_BODY_FORMAT_SIZE + strlen(userdata->notification_body)+1;
+  char body[body_width];
   sprintf(body, NOTIFICATION_BODY_FORMAT, userdata->notification_body);
 
   notify_init(summary);

@@ -10,7 +10,7 @@
 #define NOTIFICATION_LITERAL_HINT_VALUE       "value"
 
 extern const char* NOTIFICATION_BODY_FORMAT;
-extern const int NOTIFICATION_BODY_FORMAT_SIZE;
+extern const int   NOTIFICATION_BODY_FORMAT_SIZE;
 
 void display_volume_notification(userdata_t *userdata);
 
