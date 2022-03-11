@@ -3,10 +3,10 @@
 #include "pulseaudio.h"
 #include "userdata.h"
 
-pa_mainloop *mainloop         = NULL;
+pa_mainloop     *mainloop     = NULL;
 pa_mainloop_api *mainloop_api = NULL;
-pa_context *context           = NULL;
-int pa_retval                 = EXIT_SUCCESS;
+pa_context      *context      = NULL;
+int             pa_retval     = EXIT_SUCCESS;
 
 
 int pulseaudio_init_context(pa_context *context, int pa_retval) {
@@ -57,9 +57,9 @@ pa_volume_t denormalize(int volume) {
 
 
 void set_volume_callback( pa_context *context,
-                                 const pa_sink_info *sink_info,
-                                 __attribute__((unused)) int eol,
-                                 void *pulseaudio_userdata ) {
+                          const pa_sink_info *sink_info,
+                          __attribute__((unused)) int eol,
+                          void *pulseaudio_userdata ) {
   if (sink_info == NULL) return;
 
   userdata_t *userdata = (userdata_t *) pulseaudio_userdata;
@@ -72,11 +72,14 @@ void set_volume_callback( pa_context *context,
       pa_context_set_sink_mute_by_index(context, sink_info->index, 0, NULL, NULL);
       break;
     case MUTE_TOGGLE: {
-      int new_mute_state = !sink_info->mute;
+      bool new_mute_state = !sink_info->mute;
       pa_context_set_sink_mute_by_index(context, sink_info->index, new_mute_state, NULL, NULL);
       userdata->mute = new_mute_state ? MUTE_ON : MUTE_OFF;
       break;
     }
+    case MUTE_UNKNOWN:
+      userdata->mute = sink_info->mute ? MUTE_ON : MUTE_OFF;
+      break;
   }
 
   // Turn muting off on any volume change, unless muting was specifically turned on or toggled.
