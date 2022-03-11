@@ -1,17 +1,9 @@
 #include <errno.h>
 #include <getopt.h>
-// #include <locale.h>
-// #include <memory.h>
 #include <stdbool.h>
-#include <stddef.h> // wchar_t
 #include <stdlib.h> // EXIT_*
-#include <stdint.h> // uint32_t
 #include <stdio.h>  // printf
 #include <string.h> // strcpy
-// #include <uchar.h>
-// #include <unistd.h> // usleep
-// #include <wchar.h>
-#include <X11/Xlib.h>
 
 #include "userdata.h"
 #include "notification.h"
@@ -37,7 +29,7 @@ static bool parse_volume_argument(char *optarg, userdata_t &userdata) {
 char* pathjoin(char* s1, char* s2) {
   const char* glue = "/";
   const size_t joined_sized = strlen(s1) + strlen(s2) + 1;
-  char* joined = (char*)malloc(joined_sized);
+  char* joined = (char*) malloc(joined_sized);
   joined[0]=0;
   strcat(joined, s1);
   strcat(joined, glue);
@@ -45,44 +37,26 @@ char* pathjoin(char* s1, char* s2) {
   return joined;
 }
 
-static void load_icons_from_Xresources(userdata_t *userdata) {
+static void icons_from_Xresources(userdata_t *userdata) {
   Xresource_init();
-
   char *icon_path = Xresource_get((char*)XRESOURCE_KEY_ICON_PATH);
+  Xresource_close();
 
   if (userdata->icon_muted == NULL)
-    userdata->icon_muted = pathjoin( icon_path,
-                                     Xresource_get((char*)XRESOURCE_KEY_ICON_MUTED));
+    userdata->icon_muted = pathjoin(icon_path, (char*)(ICON_FILE_MUTED));
 
   if (userdata->icon_low == NULL)
-    userdata->icon_low = pathjoin( icon_path,
-                                   Xresource_get((char*)XRESOURCE_KEY_ICON_LOW) );
+    userdata->icon_low = pathjoin(icon_path, (char*)(ICON_FILE_LOW));
 
   if (userdata->icon_medium == NULL)
-    userdata->icon_medium = pathjoin( icon_path,
-                                      Xresource_get((char*)XRESOURCE_KEY_ICON_MEDIUM) );
+    userdata->icon_medium = pathjoin(icon_path, (char*)(ICON_FILE_MEDIUM));
 
   if (userdata->icon_high == NULL)
-    userdata->icon_high = pathjoin( icon_path,
-                                    Xresource_get((char*)XRESOURCE_KEY_ICON_HIGH) );
+    userdata->icon_high = pathjoin(icon_path, (char*)(ICON_FILE_HIGH));
 
   if (userdata->icon_overamplified == NULL)
-    userdata->icon_overamplified =
-      pathjoin(icon_path, Xresource_get((char*)XRESOURCE_KEY_ICON_OVERAMPLIFIED) );
+    userdata->icon_overamplified = pathjoin(icon_path, (char*)(ICON_FILE_OVERAMPLIFIED));
 
-  #ifdef DEBUG
-  printf(
-    "%s\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n",
-    icon_path,
-    userdata->icon_muted,
-    userdata->icon_low,
-    userdata->icon_medium,
-    userdata->icon_high,
-    userdata->icon_overamplified
-  );
-  #endif
-
-  Xresource_close();
 }
 
 
@@ -176,7 +150,7 @@ int main(int argc, char *argv[]) {
     if (!parse_volume_argument(*positional, userdata)) return usage(argv);
   }
 
-  load_icons_from_Xresources(&userdata);
+  icons_from_Xresources(&userdata);
 
   // Lock process mutex
   if (!no_process_mutex) process_mutex_lock();
