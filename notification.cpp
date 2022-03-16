@@ -1,11 +1,25 @@
-#include <stdint.h>
+#include <librsvg/rsvg.h>
+
 #include "notification.h"
 #include "pulseaudio.h"
-#include <gio/gio.h>
-#include "icons/high.h"
+#include "icons.h"
+#include "svg.h"
 
 const char* NOTIFICATION_BODY_FORMAT = NOTIFICATION_LITERAL_BODY_FORMAT;
 const int   NOTIFICATION_BODY_FORMAT_SIZE = strlen(NOTIFICATION_BODY_FORMAT) - 2;
+
+const guint8* icons[] = { (guint8*) silent_svg_raw,
+                          (guint8*)    low_svg_raw,
+                          (guint8*) medium_svg_raw,
+                          (guint8*)   high_svg_raw };
+
+const gsize icon_sizes[] = { (gsize) silent_svg_raw_size, // double const?
+                             (gsize)    low_svg_raw_size,
+                             (gsize) medium_svg_raw_size,
+                             (gsize)   high_svg_raw_size };
+
+const size_t icons_size = sizeof(icons) / sizeof(icons[0]);
+const unsigned char divisor = 100 / icons_size;
 
 void display_volume_notification(userdata_t *userdata) {
   int volume = userdata->new_volume;
@@ -14,19 +28,23 @@ void display_volume_notification(userdata_t *userdata) {
   fflush(stdout);
 
   char *summary = (char*)NOTIFICATION_LITERAL_CATEGORY;
-  char *icon;
+  guint8* icon    = (guint8*) high_svg_raw;
+  gsize icon_size = (gsize)   high_svg_raw_size;
 
-  if (userdata->mute == MUTE_ON) icon = (char*)userdata->icon_muted;
+  if (userdata->mute == MUTE_ON) {
+    icon      = (guint8*) muted_svg_raw;
+    icon_size = (gsize)   muted_svg_raw_size;
+  }
   else {
-    uint8_t loudness = volume/33;
-    switch(loudness) {
-      case 0:  icon = (char*)userdata->icon_low;           break;
-      case 1:  icon = (char*)userdata->icon_medium;        break;
-      case 2:  icon = (char*)userdata->icon_high;          break;
-      default:
-        icon = (char*)userdata->icon_overamplified;
-        volume = (volume % 100) * 100 / PULSEAUDIO_OVERAMPLIFIED_RANGE;
-        break;
+    unsigned char loudness = volume ? (volume-1)/divisor : 0;
+    if (loudness < icons_size) {
+      icon      = (guint8*) icons[loudness];
+      icon_size = (gsize)   icon_sizes[loudness];
+    }
+    else {
+      icon      = (guint8*) overamplified_svg_raw;
+      icon_size = (gsize)   overamplified_svg_raw_size;
+      volume = (volume % 100) * 100 / PULSEAUDIO_OVERAMPLIFIED_RANGE;
     }
   }
 
@@ -35,18 +53,20 @@ void display_volume_notification(userdata_t *userdata) {
   char body[body_width];
   sprintf(body, NOTIFICATION_BODY_FORMAT, userdata->notification_body);
 
-  // gdk_pixbuf_new_from_inline ( -1, high, false, NULL);
-  GdkPixbuf* pixbuf = gdk_pixbuf_new_from_data ( (const guchar*) ICON_HIGH_PIXEL_DATA,
-                                                 GDK_COLORSPACE_RGB,
-                                                 /*has_alpha=*/true,
-                                                 /*bits_per_sample=*/8,
-                                                 ICON_HIGH_WIDTH,
-                                                 ICON_HIGH_HEIGHT,
-                                                 ICON_HIGH_ROWSTRIDE,
-                                                 NULL,
-                                                 NULL);
+  // int size = snprintf(NULL, 0, "%d", 132);
+  // char * a = malloc(size + 1);
+  // sprintf(a, "%d", 132);
+  RsvgHandle *rsvg_handle = rsvg_handle_new_from_data(icon, icon_size, NULL);
+  bool stylesheet_status =
+    rsvg_handle_set_stylesheet (rsvg_handle,
+                                (const guint8*)icon_stylesheet,
+                                (gsize)icon_stylesheet_size,
+                                NULL);
+  if (!stylesheet_status) printf("Stylesheet failed\n");
 
-
+  // scale_svg(rsvg_handle, 0.1, 0.1, pixbuf);
+  GdkPixbuf* pixbuf = rsvg_handle_get_pixbuf(rsvg_handle);
+  g_object_unref (rsvg_handle);
 
 
   notify_init(summary);

@@ -73,7 +73,8 @@ int main(int argc, char *argv[]) {
                           .icon_high            = NULL,
                           .icon_overamplified   = NULL, };
 
-  bool no_process_mutex = false;
+  bool process_mutex = true;
+
   /*
     struct option = { name, has_argument, flag, return_val}
     has_argument:
@@ -130,7 +131,7 @@ int main(int argc, char *argv[]) {
         break;
 
       case 'u'/*nlock*/:
-        no_process_mutex = true;
+        process_mutex = false;
         break;
 
       case 'X': userdata.icon_muted         = optarg; break;
@@ -150,10 +151,10 @@ int main(int argc, char *argv[]) {
     if (!parse_volume_argument(*positional, userdata)) return usage(argv);
   }
 
-  icons_from_Xresources(&userdata);
-
   // Lock process mutex
-  if (!no_process_mutex) process_mutex_lock();
+  if (process_mutex) process_mutex_lock();
+
+  icons_from_Xresources(&userdata);
 
 
   mainloop = pa_mainloop_new();
