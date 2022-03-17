@@ -1,5 +1,3 @@
-#include <librsvg/rsvg.h>
-
 #include "notification.h"
 #include "pulseaudio.h"
 #include "icons.h"
@@ -13,7 +11,7 @@ const guint8* icons[] = { (guint8*) silent_svg_raw,
                           (guint8*) medium_svg_raw,
                           (guint8*)   high_svg_raw };
 
-const gsize icon_sizes[] = { (gsize) silent_svg_raw_size, // double const?
+const gsize icon_sizes[] = { (gsize) silent_svg_raw_size,
                              (gsize)    low_svg_raw_size,
                              (gsize) medium_svg_raw_size,
                              (gsize)   high_svg_raw_size };
@@ -48,33 +46,22 @@ void display_volume_notification(userdata_t *userdata) {
     }
   }
 
-
   size_t body_width = NOTIFICATION_BODY_FORMAT_SIZE + strlen(userdata->notification_body)+1;
   char body[body_width];
   sprintf(body, NOTIFICATION_BODY_FORMAT, userdata->notification_body);
 
-  // int size = snprintf(NULL, 0, "%d", 132);
-  // char * a = malloc(size + 1);
-  // sprintf(a, "%d", 132);
-  RsvgHandle *rsvg_handle = rsvg_handle_new_from_data(icon, icon_size, NULL);
-  bool stylesheet_status =
-    rsvg_handle_set_stylesheet (rsvg_handle,
-                                (const guint8*)icon_stylesheet,
-                                (gsize)icon_stylesheet_size,
-                                NULL);
-  if (!stylesheet_status) printf("Stylesheet failed\n");
-
-  // scale_svg(rsvg_handle, 0.1, 0.1, pixbuf);
-  GdkPixbuf* pixbuf = rsvg_handle_get_pixbuf(rsvg_handle);
-  g_object_unref (rsvg_handle);
-
-
   notify_init(summary);
-  // NotifyNotification *notification = notify_notification_new(summary, body, icon);
   NotifyNotification *notification = notify_notification_new(summary, body, NULL);
   notify_notification_set_category(notification, NOTIFICATION_LITERAL_CATEGORY);
   notify_notification_set_timeout(notification,  userdata->notification_timeout);
-  notify_notification_set_image_from_pixbuf(notification, pixbuf);
+
+  bool icon_success = populate_notification_icon(notification, icon, icon_size,
+                                                 userdata->icon_primary_color,
+                                                 userdata->icon_secondary_color);
+  if (!icon_success) {
+    fprintf(stderr, "Error rendering notification icon\n" );
+    exit(EXIT_FAILURE);
+  }
 
   /* https://people.gnome.org/~desrt/glib-docs/glib-GVariant.html
      info on GVariants since notify_notification_set_hint_* methods are deprecated */

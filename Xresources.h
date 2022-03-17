@@ -9,13 +9,7 @@ void  Xresource_close();
 char* Xresource_get(char* key);
 
 
-#define XRESOURCE_KEY_ICON_PATH          "pavol-dunst.iconPath"
-#define XRESOURCE_KEY_ICON_SIZE          "pavol-dunst.iconSize"
-#define XRESOURCE_KEY_ICON_MUTED         "pavol-dunst.iconMuted"
-#define XRESOURCE_KEY_ICON_LOW           "pavol-dunst.iconLow"
-#define XRESOURCE_KEY_ICON_MEDIUM        "pavol-dunst.iconMedium"
-#define XRESOURCE_KEY_ICON_HIGH          "pavol-dunst.iconHigh"
-#define XRESOURCE_KEY_ICON_OVERAMPLIFIED "pavol-dunst.iconOveramplified"
-
+#define XRESOURCE_KEY_ICON_PRIMARY_COLOR   "pavol-dunst.primaryColor"
+#define XRESOURCE_KEY_ICON_SECONDARY_COLOR "pavol-dunst.secondaryColor"
 
 #endif

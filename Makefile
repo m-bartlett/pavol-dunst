@@ -5,15 +5,11 @@ SHELL := /bin/bash
 TARGET := pavol-dunst
 
 ICON_SIZE ?= 64
-ICON_DARK_PRIMARY    ?= \#282828
-ICON_DARK_SECONDARY  ?= \#888
-ICON_LIGHT_PRIMARY   ?= \#e8e8e8
-ICON_LIGHT_SECONDARY ?= \#808080
 
 LIBS     := pulse
 PKG_LIBS := libnotify xcb-xrm librsvg-2.0    # pkg-config --list-all
 
-CC        :=  g++
+CC        := g++
 CFLAGS    := $(shell pkg-config --cflags $(PKG_LIBS))
 LIB_FLAGS := $(shell pkg-config --libs $(PKG_LIBS))
 LIB_FLAGS += $(addprefix -l, $(LIBS))
@@ -27,10 +23,6 @@ OBJECTS   := $(SOURCES:.cpp=.o)
 
 ICON_SVGS  := $(wildcard svg/*.svg)
 ICON_HEADERS  := $(patsubst svg/%.svg, icon/%.h, $(ICON_SVGS))
-# ICON_PNGS_LIGHT := $(patsubst svg/%.svg, png/light_%.png, $(ICON_SVGS))
-# ICON_PNGS_DARK  := $(patsubst svg/%.svg, png/dark_%.png,  $(ICON_SVGS))
-# ICON_PNGS  := $(ICON_PNGS_DARK) $(ICON_PNGS_LIGHT)
-# ICON_BLOBS := $(patsubst png/%.png, icon/%.h, $(ICON_PNGS))
 
 
 all:	# Multi-threaded make by default
@@ -39,13 +31,12 @@ all:	# Multi-threaded make by default
 debug: CFLAGS += -D DEBUG
 debug: $(TARGET)
 
-
 $(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(LIB_FLAGS) $^ -o $@ -O3
 
 $(OBJECTS): $(SOURCES) $(HEADERS) $(ICON_HEADERS)
 
-%.o: %.cpp		# Recompile objects only if their respective source changes
+%.o: %.cpp
 	$(CC) $(CFLAGS) $(LDFLAGS) $(LIB_FLAGS) -c $< -o $@
 
 $(SOURCES): $(MAKEFILE) # If Makefile changes, recompile

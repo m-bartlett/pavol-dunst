@@ -26,37 +26,23 @@ static bool parse_volume_argument(char *optarg, userdata_t &userdata) {
   return true;
 }
 
-char* pathjoin(char* s1, char* s2) {
-  const char* glue = "/";
-  const size_t joined_sized = strlen(s1) + strlen(s2) + 1;
-  char* joined = (char*) malloc(joined_sized);
-  joined[0]=0;
-  strcat(joined, s1);
-  strcat(joined, glue);
-  strcat(joined, s2);
-  return joined;
-}
 
-static void icons_from_Xresources(userdata_t *userdata) {
+static void read_from_Xresources(userdata_t *userdata) {
   Xresource_init();
-  char *icon_path = Xresource_get((char*)XRESOURCE_KEY_ICON_PATH);
+
+  if (userdata->icon_primary_color == NULL) {
+    static char* icon_primary_color = Xresource_get((char*)XRESOURCE_KEY_ICON_PRIMARY_COLOR);
+    if (icon_primary_color != NULL) userdata->icon_primary_color = icon_primary_color;
+    else icon_primary_color = (char*)"#fff";
+  }
+
+  if (userdata->icon_secondary_color == NULL) {
+    static char* icon_secondary_color = Xresource_get((char*)XRESOURCE_KEY_ICON_SECONDARY_COLOR);
+    if (icon_secondary_color != NULL) userdata->icon_secondary_color = icon_secondary_color;
+    else icon_secondary_color = (char*)"#888";
+  }
+
   Xresource_close();
-
-  if (userdata->icon_muted == NULL)
-    userdata->icon_muted = pathjoin(icon_path, (char*)(ICON_FILE_MUTED));
-
-  if (userdata->icon_low == NULL)
-    userdata->icon_low = pathjoin(icon_path, (char*)(ICON_FILE_LOW));
-
-  if (userdata->icon_medium == NULL)
-    userdata->icon_medium = pathjoin(icon_path, (char*)(ICON_FILE_MEDIUM));
-
-  if (userdata->icon_high == NULL)
-    userdata->icon_high = pathjoin(icon_path, (char*)(ICON_FILE_HIGH));
-
-  if (userdata->icon_overamplified == NULL)
-    userdata->icon_overamplified = pathjoin(icon_path, (char*)(ICON_FILE_OVERAMPLIFIED));
-
 }
 
 
@@ -67,12 +53,8 @@ int main(int argc, char *argv[]) {
                           .mute                 = MUTE_UNKNOWN,
                           .notification_timeout = 1500,
                           .notification_body    = (char*)"",
-                          .icon_muted           = NULL,
-                          .icon_low             = NULL,
-                          .icon_medium          = NULL,
-                          .icon_high            = NULL,
-                          .icon_overamplified   = NULL, };
-
+                          .icon_primary_color   = NULL,
+                          .icon_secondary_color = NULL };
   bool process_mutex = true;
 
   /*
@@ -87,23 +69,21 @@ int main(int argc, char *argv[]) {
          option is found, but left unchanged if the option is not found.
     return_val: value to return, or to load into the variable pointed to by flag.
   */
+
   static const struct option long_options[] = {
-    {"help",               no_argument,       /*flag=*/NULL, /*return_val=*/'h'},
-    {"mute",               required_argument, /*flag=*/NULL, /*return_val=*/'m'},
-    {"volume",             required_argument, /*flag=*/NULL, /*return_val=*/'v'},
-    {"body",               required_argument, /*flag=*/NULL, /*return_val=*/'b'},
-    {"timeout",            required_argument, /*flag=*/NULL, /*return_val=*/'t'},
-    {"unlock",             required_argument, /*flag=*/NULL, /*return_val=*/'u'},
-    {"icon-mute",          required_argument, /*flag=*/NULL, /*return_val=*/'X'},
-    {"icon-low",           required_argument, /*flag=*/NULL, /*return_val=*/'L'},
-    {"icon-medium",        required_argument, /*flag=*/NULL, /*return_val=*/'M'},
-    {"icon-high",          required_argument, /*flag=*/NULL, /*return_val=*/'H'},
-    {"icon-overamplified", required_argument, /*flag=*/NULL, /*return_val=*/'O'},
+    {"help",            no_argument,       /*flag=*/NULL, /*return_val=*/'h'},
+    {"mute",            required_argument, /*flag=*/NULL, /*return_val=*/'m'},
+    {"volume",          required_argument, /*flag=*/NULL, /*return_val=*/'v'},
+    {"body",            required_argument, /*flag=*/NULL, /*return_val=*/'b'},
+    {"timeout",         required_argument, /*flag=*/NULL, /*return_val=*/'t'},
+    {"unlock",          required_argument, /*flag=*/NULL, /*return_val=*/'u'},
+    {"primary-color",   required_argument, /*flag=*/NULL, /*return_val=*/'P'},
+    {"secondary-color", required_argument, /*flag=*/NULL, /*return_val=*/'S'},
     {NULL,     0, NULL, 0}  // null entry indicates end of option array
   };
 
   int opt;
-  while ((opt = getopt_long(argc, argv, "-huv:m:b:t:X:L:M:H:O:", long_options, NULL) ) != -1) {
+  while ((opt = getopt_long(argc, argv, "-huv:m:b:t:P:S:", long_options, NULL) ) != -1) {
     switch (opt) {
 
       case 'h'/*elp*/: return usage(argv);
@@ -134,11 +114,13 @@ int main(int argc, char *argv[]) {
         process_mutex = false;
         break;
 
-      case 'X': userdata.icon_muted         = optarg; break;
-      case 'L': userdata.icon_low           = optarg; break;
-      case 'M': userdata.icon_medium        = optarg; break;
-      case 'H': userdata.icon_high          = optarg; break;
-      case 'O': userdata.icon_overamplified = optarg; break;
+      case 'P'/*rimary*/:
+        userdata.icon_primary_color = optarg;
+        break;
+
+      case 'S'/*secondary*/:
+        userdata.icon_secondary_color = optarg;
+        break;
 
       default:
         // Positional argument, parse as volume modification
@@ -154,7 +136,7 @@ int main(int argc, char *argv[]) {
   // Lock process mutex
   if (process_mutex) process_mutex_lock();
 
-  icons_from_Xresources(&userdata);
+  read_from_Xresources(&userdata);
 
 
   mainloop = pa_mainloop_new();

@@ -10,11 +10,8 @@ typedef struct userdata_t {
   mute_t mute;
   int notification_timeout;
   char *notification_body;
-  char *icon_muted;
-  char *icon_low;
-  char *icon_medium;
-  char *icon_high;
-  char *icon_overamplified;
+  char *icon_primary_color;
+  char *icon_secondary_color;
 } userdata_t;
 
 #endif
