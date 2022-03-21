@@ -5,7 +5,7 @@ A keybindable application to modify volume levels on audio sinks within PulseAud
 <img src="https://user-images.githubusercontent.com/85039141/159210149-61b51c1f-6674-4aaf-9589-3f7906c8c507.gif">
 <br/><sub>on-screen keyboard input display software is <a href="https://github.com/critiqjo/key-mon">key-mon</a></sub>
 </p>
-<br/><br/><br/>
+<br/><br/>
 <p align="center">
   <span>
     <img
@@ -71,6 +71,8 @@ A keybindable application to modify volume levels on audio sinks within PulseAud
   <sub>These color schemes use this application's <a href="#xresource-support">Xresource support</a> and my project <a href="https://github.com/m-bartlett/wpal">wpal</a> which exports color palettes generated from the desktop wallpaper to Xresources.</sub>
 </p>
 
+<br/><br/>
+
 ---
 
 ### Table of Contents
@@ -88,6 +90,8 @@ A keybindable application to modify volume levels on audio sinks within PulseAud
   * [Developer Notes](#developer-notes)
 
 ---
+
+<br/>
 
 ## Install
 Succinctly:
