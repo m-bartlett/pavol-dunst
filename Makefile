@@ -4,10 +4,8 @@ SHELL := /bin/bash
 
 TARGET := pavol-dunst
 
-ICON_SIZE ?= 64
-
 LIBS     := pulse
-PKG_LIBS := libnotify xcb-xrm librsvg-2.0    # pkg-config --list-all
+PKG_LIBS := libnotify xcb-xrm librsvg-2.0 gdk-3.0     # pkg-config --list-all
 
 CC        := g++
 CFLAGS    := $(shell pkg-config --cflags $(PKG_LIBS))
@@ -50,7 +48,6 @@ icon/%.h: svg/%.svg $(MAKEFILE)
 	@mkdir -p ./icon
 	<$< \
 		sed -e 's/"/\\"/g' \
-			-e 's/128px/$(ICON_SIZE)px/g' \
 			-e 's@<style>.*</style>@@g' \
 			-e 's/^/const char* $(patsubst svg/%.svg,%_svg_raw,$<) = "/' \
 			-e 's/$$/"\;\x0aconst size_t $(patsubst svg/%.svg,%_svg_raw_size,$<) = strlen($(patsubst svg/%.svg,%_svg_raw,$<));/' \
