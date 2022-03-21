@@ -10,9 +10,13 @@ This was inspired by [pavol](https://github.com/dturing/pavol) and [pavolume](ht
 </p>
 
 ## Install
-Run `make` to execute a multi-threaded build by default, or alternatively run `make pavol-dunst`.
+Succinctly:
+```sh
+cd ./src/
+make && sudo make install
+````
 
-After successful compilation, run `sudo make install`. Succinctly, `make && sudo make install`.
+`make` will execute a multi-threaded build by default; alternatively run `make pavol-dunst`.
 
 If you do not have `sudo` privileges then modify the `PREFIX` variable, for example: `PREFIX=$HOME/.local make install`
 
@@ -52,7 +56,7 @@ See `pavol-dunst --help` for documentation on the various command flags:
 ```
 
 For extra usage details please see the
-[Shared Memory Single-Process Mutex Lock](#shared-memory-single-process-mutex-lock),
+[Shared Memory Singleton-Process Mutex Lock](#shared-memory-singleton-process-mutex-lock),
 [PulseAudio Support](#pulseaudio-support),
 and
 [Xresource Support](#xresource-support)
@@ -73,7 +77,7 @@ bindsym XF86AudioMute        exec --no-startup-id pavol-dunst -m toggle
 ```
 
 ### Custom Icons
-In theory this application supports adding custom icons, however this was not intended as a first-class feature. Consequently, there is no minification pipeline to reduce the embedded SVG string body sizes. This application renders icon colors dynamically by implementing CSS classes that get passed to the RSVG rendering backend. To reduce compiled binary size, these CSS classes are not named verbosely. One may find the raw CSS stylesheet string that gets passed to the icon rendering in [`svg.cpp`](svg.cpp), however a more semantically expressive version follows:
+In theory this application supports adding custom icons, however this was not intended as a first-class feature. Consequently, there is no minification pipeline to reduce the embedded SVG string body sizes. This application renders icon colors dynamically by implementing CSS classes that get passed to the RSVG rendering backend. To reduce compiled binary size, these CSS classes are not named verbosely. One may find the raw CSS stylesheet string that gets passed to the icon rendering in [`svg.cpp`](src/svg.cpp), however a more semantically expressive version follows:
 ```css
 * { --primary: #fff; --secondary: #888; } /* librsvg doesn't support var() in stylesheet rendering, this is just for explanation */
 .A { fill: var(--primary); stroke:none }  /* class A is "fill this path with the primary color */
@@ -101,7 +105,7 @@ For reference, here was a previous possible icon set I designed myself, you may 
 As one might expect, this application changes the volume of the current default audio sink in PulseAudio. Emphasis on "the current default audio sink". If you have multiple sinks registered this application may not modify the volume of the audio source you are expecting. This is currently a limitation and the user will need to modify the default sink using a different application (probably [`pavucontrol`](https://freedesktop.org/software/pulseaudio/pavucontrol/)).
 
 ### Xresource Support
-This application supports reading the CSS colors for the SVG icon renderring from [Xresources](https://wiki.archlinux.org/title/X_resources). The user may also provide color changing arguments via the `--primary` and `--secondary` flags. The user can see which Xresource keys are most currently expected in [Xresources.h](Xresources.h). As of writing the application will query for the following keys:
+This application supports reading the CSS colors for the SVG icon renderring from [Xresources](https://wiki.archlinux.org/title/X_resources). The user may also provide color changing arguments via the `--primary` and `--secondary` flags. The user can see which Xresource keys are most currently expected in [Xresources.h](src/Xresources.h). As of writing the application will query for the following keys:
 
 - pavol-dunst.primaryColor: _valid CSS color_
 - pavol-dunst.secondaryColor: _valid CSS color_
@@ -112,7 +116,7 @@ xrdb -merge <(echo -e "pavol-dunst.primaryColor: #f00 \n pavol-dunst.primaryColo
 ```
 
 
-### Shared Memory Single-Process Mutex Lock
+### Shared Memory Singleton-Process Mutex Lock
 This application uses shared memory to set a process mutually-exclusive (mutex) lock. This is simply to prevent jumpy audio level fluctuations caused by several instances being spawned in short succession. This may be due to either to the oparting system scheduling the processes in an unexpected order or the audio sink having a large latency. For example, a user may easily reproduce this behavior by holding down a keyboard key that this process is bound to, while the audio sink is a bluetooth device&mdash;the processes execute and queue a volume change faster than the bluetooth sink can receive and acknowledge the volume change, leading to unpredicatble volume level "relapsing".
 
 If the process unexpectedly exits due to an unforeseen error, this single-process lock memory might be locked and not unlocked due to the unexpected exit. If you see the error message `Process mutex locked, dying.` when no other iteration of this process is running, then use the `--unlock` a.k.a. `-u` flag to forcibly unlock the process mutex. This flag may also be provided to each invocation of this application to disable the single-process mutex lock feature entirely.
