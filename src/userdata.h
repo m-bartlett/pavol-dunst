@@ -1,6 +1,7 @@
 #ifndef USERDATA_H
 #define USERDATA_H
 
+#include <stdbool.h>
 #include "pulseaudio.h"
 
 typedef struct userdata_t {

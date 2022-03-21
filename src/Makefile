@@ -8,16 +8,16 @@ LIBS     := pulse
 PKG_LIBS := libnotify xcb-xrm librsvg-2.0 gdk-3.0     # pkg-config --list-all
 
 CC        := gcc
-CFLAGS    := $(shell pkg-config --cflags $(PKG_LIBS)) -std=gnu++11 -fno-threadsafe-statics
+CFLAGS    := $(shell pkg-config --cflags $(PKG_LIBS)) -std=c11
 LIB_FLAGS := $(shell pkg-config --libs $(PKG_LIBS))
 LIB_FLAGS += $(addprefix -l, $(LIBS))
 
 PREFIX    ?= /usr/local
 BINPREFIX := $(PREFIX)/bin
 
-SOURCES   := $(wildcard *.cpp)
+SOURCES   := $(wildcard *.c)
 HEADERS   := $(wildcard *.h)
-OBJECTS   := $(SOURCES:.cpp=.o)
+OBJECTS   := $(SOURCES:.c=.o)
 
 ICON_SVGS  := $(wildcard svg/*.svg)
 ICON_HEADERS  := $(patsubst svg/%.svg, icon/%.h, $(ICON_SVGS))
@@ -34,7 +34,7 @@ $(TARGET): $(OBJECTS)
 
 $(OBJECTS): $(SOURCES) $(HEADERS) $(ICON_HEADERS)
 
-%.o: %.cpp
+%.o: %.c
 	$(CC) $(CFLAGS) $(LDFLAGS) $(LIB_FLAGS) -c $< -o $@
 
 $(SOURCES): $(MAKEFILE) # If Makefile changes, recompile
@@ -49,7 +49,7 @@ icon/%.h: svg/%.svg $(MAKEFILE)
 	<$< \
 		sed -e 's/"/\\"/g' \
 			-e 's@<style>.*</style>@@g' \
-			-e 's/^/const char* $(patsubst svg/%.svg,%_svg_raw,$<) = "/' \
+			-e 's/^/const char $(patsubst svg/%.svg,%_svg_raw,$<)[] = "/' \
 			-e 's/$$/"\;\x0aconst size_t $(patsubst svg/%.svg,%_svg_raw_size,$<) = strlen($(patsubst svg/%.svg,%_svg_raw,$<));/' \
 		> $@
 

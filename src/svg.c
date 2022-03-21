@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <libnotify/notify.h>
 #include <librsvg/rsvg.h>
 #include <cairo.h>

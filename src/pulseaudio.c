@@ -1,4 +1,4 @@
-#include <cstring>
+#include <string.h>
 #include <math.h>
 #include "pulseaudio.h"
 #include "userdata.h"
@@ -7,6 +7,8 @@ pa_mainloop     *mainloop     = NULL;
 pa_mainloop_api *mainloop_api = NULL;
 pa_context      *context      = NULL;
 int             pa_retval     = EXIT_SUCCESS;
+
+const unsigned short PULSEAUDIO_OVERAMPLIFIED_RANGE = PULSEAUDIO_OVERAMPLIFIED_MAX - 100;
 
 
 int pulseaudio_init_context(pa_context *context, int pa_retval) {

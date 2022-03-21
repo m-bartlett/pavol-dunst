@@ -2,18 +2,17 @@
 #define PULSEAUDIO_H
 
 #include <pulse/pulseaudio.h>
-#include <stdint.h>
 
 #define PULSEAUDIO_OVERAMPLIFIED_MAX 150
 
-const uint16_t PULSEAUDIO_OVERAMPLIFIED_RANGE = PULSEAUDIO_OVERAMPLIFIED_MAX - 100;
+extern const unsigned short PULSEAUDIO_OVERAMPLIFIED_RANGE;
 
 extern pa_mainloop *mainloop;
 extern pa_mainloop_api *mainloop_api;
 extern pa_context *context;
 extern int pa_retval;
 
-enum mute_t { MUTE_ON, MUTE_OFF, MUTE_TOGGLE, MUTE_UNKNOWN };
+typedef enum mute_t { MUTE_ON, MUTE_OFF, MUTE_TOGGLE, MUTE_UNKNOWN } mute_t;
 
 int pulseaudio_init_context(pa_context *context, int pa_retval);
 

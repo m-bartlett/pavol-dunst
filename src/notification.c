@@ -1,9 +1,10 @@
+#include <stdbool.h>
 #include "notification.h"
 #include "pulseaudio.h"
 #include "icons.h"
 #include "svg.h"
 
-const char* NOTIFICATION_BODY_FORMAT = NOTIFICATION_LITERAL_BODY_FORMAT;
+const char NOTIFICATION_BODY_FORMAT[] = NOTIFICATION_LITERAL_BODY_FORMAT;
 const int   NOTIFICATION_BODY_FORMAT_SIZE = strlen(NOTIFICATION_BODY_FORMAT) - 2;
 
 const guint8* icon_bodies[] = { (guint8*) silent_svg_raw,
@@ -11,10 +12,10 @@ const guint8* icon_bodies[] = { (guint8*) silent_svg_raw,
                                 (guint8*) medium_svg_raw,
                                 (guint8*)   high_svg_raw };
 
-const gsize icon_body_sizes[] = { (gsize) silent_svg_raw_size,
-                                  (gsize)    low_svg_raw_size,
-                                  (gsize) medium_svg_raw_size,
-                                  (gsize)   high_svg_raw_size };
+const gsize icon_body_sizes[] = { silent_svg_raw_size,
+                                     low_svg_raw_size,
+                                  medium_svg_raw_size,
+                                    high_svg_raw_size };
 
 const size_t icon_bodies_size = sizeof(icon_bodies) / sizeof(icon_bodies[0]);
 const unsigned char divisor = 100 / icon_bodies_size;

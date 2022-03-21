@@ -25,14 +25,14 @@ void read_from_Xresources(userdata_t *userdata) {
   Xresource_init();
 
   if (userdata->icon_primary_color == NULL) {
-    static char* icon_primary_color = Xresource_get((char*)XRESOURCE_KEY_ICON_PRIMARY_COLOR);
-    if (icon_primary_color != NULL) userdata->icon_primary_color = icon_primary_color;
+    char* icon_primary_color = Xresource_get((char*)XRESOURCE_KEY_ICON_PRIMARY_COLOR);
+    if (icon_primary_color != NULL) userdata->icon_primary_color = (char*)icon_primary_color;
     else icon_primary_color = (char*)"#fff";
   }
 
   if (userdata->icon_secondary_color == NULL) {
-    static char* icon_secondary_color = Xresource_get((char*)XRESOURCE_KEY_ICON_SECONDARY_COLOR);
-    if (icon_secondary_color != NULL) userdata->icon_secondary_color = icon_secondary_color;
+    char* icon_secondary_color = Xresource_get((char*)XRESOURCE_KEY_ICON_SECONDARY_COLOR);
+    if (icon_secondary_color != NULL) userdata->icon_secondary_color = (char*)icon_secondary_color;
     else icon_secondary_color = (char*)"#888";
   }
 

@@ -45,13 +45,13 @@ static int usage(char *argv[]) {
   exit(EXIT_FAILURE);
 }
 
-static bool parse_volume_argument(char *optarg, userdata_t &userdata) {
-  userdata.volume = (int) strtol(optarg, NULL, 10);
-  if (userdata.volume == 0 && strcmp(optarg, "0") != 0) {
+static bool parse_volume_argument(char *optarg, userdata_t *userdata) {
+  userdata->volume = (int) strtol(optarg, NULL, 10);
+  if (userdata->volume == 0 && strcmp(optarg, "0") != 0) {
     // strtol() defaults to 0 on error. If string isn't literally '0', assume there's an error.
     return false;
   }
-  if (optarg[0] == '-' || optarg[0] == '+') userdata.volume_delta = true;
+  if (optarg[0] == '-' || optarg[0] == '+') userdata->volume_delta = true;
   return true;
 }
 
@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
         break;
 
       case 'v'/*olume*/:
-        if (!parse_volume_argument(optarg, userdata)) return usage(argv);
+        if (!parse_volume_argument(optarg, &userdata)) return usage(argv);
         break;
 
       case 'u'/*nlock*/:
@@ -144,13 +144,13 @@ int main(int argc, char *argv[]) {
 
       default:
         // Positional argument, parse as volume modification
-        if (!parse_volume_argument(optarg, userdata)) return usage(argv);
+        if (!parse_volume_argument(optarg, &userdata)) return usage(argv);
     }
   }
 
   for (char **positional = &argv[optind]; *positional; positional++) {
     // Positional arguments proceeding '--', also parse these as volume modifications
-    if (!parse_volume_argument(*positional, userdata)) return usage(argv);
+    if (!parse_volume_argument(*positional, &userdata)) return usage(argv);
   }
 
   // Lock process mutex
