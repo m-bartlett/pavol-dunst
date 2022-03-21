@@ -12,6 +12,7 @@ typedef struct userdata_t {
   char *notification_body;
   char *icon_primary_color;
   char *icon_secondary_color;
+  double icon_size;
 } userdata_t;
 
 #endif
