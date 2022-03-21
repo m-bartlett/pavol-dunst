@@ -11,6 +11,8 @@ This was inspired by [pavol](https://github.com/dturing/pavol) and [pavolume](ht
 
 ## About
 
+
+
 ### Custom Icons
 
 In theory this application supports adding custom icons, however this was not intended as a first-class feature. Consequently, there is no minification pipeline to reduce the embedded SVG string body sizes. This application renders icon colors dynamically by implementing CSS classes that get passed to the RSVG rendering backend. To reduce compiled binary size, these CSS classes are not named verbosely. One may find the raw CSS stylesheet string that gets passed to the icon rendering in [`svg.cpp`](svg.cpp), however a more semantically expressive version follows:
@@ -25,7 +27,20 @@ In theory this application supports adding custom icons, however this was not in
 
 As such your custom icons should implement classes `A`, `a`, and `b` to with the current code to render properly with the application's color arguments.
 
+For reference, here was a previous possible icon set I designed myself, you may use these under the same [license](LICENSE) as the rest of this repository.
+
+<p align="center">
+<span>
+  <img alt="muted" title="muted" src="https://user-images.githubusercontent.com/85039141/159212762-ecfc67f3-ca3f-4410-8c98-aafd541b6420.svg">&nbsp;&nbsp;&nbsp;&nbsp;
+  <img alt="low" title="low" src="https://user-images.githubusercontent.com/85039141/159212766-4e8384d8-c2d4-4f18-a056-20150888b404.svg">&nbsp;&nbsp;&nbsp;&nbsp;
+  <img alt="medium" title="medium" src="https://user-images.githubusercontent.com/85039141/159212765-ba488320-87b3-497c-b7c8-978f0abc3dca.svg">&nbsp;&nbsp;&nbsp;&nbsp;
+  <img alt="high" title="high" src="https://user-images.githubusercontent.com/85039141/159212768-4408899b-36c2-4529-b1e1-7f0575296bcf.svg">&nbsp;&nbsp;&nbsp;&nbsp;
+  <img alt="overamplified" title="overamplified" src="https://user-images.githubusercontent.com/85039141/159212764-7a57e53a-6ff7-4013-9053-208b1ceab7fa.svg">
+</span>
+</p>
+
 ### PulseAudio Support
+As one might hope, this application changes the volume of the current default audio sink in PulseAudio. Emphasis on "the current default audio sink". If you have multiple sinks registered this application may not modify the volume of the audio source you are expecting. This is currently a limitation and the user will need to modify the default sink using a different application (probably [`pavucontrol`](https://freedesktop.org/software/pulseaudio/pavucontrol/)).
 
 ### Xresource Support
 
