@@ -223,7 +223,7 @@ For reference, here was a previous possible icon set I designed myself, you may 
 As one might expect, this application changes the volume of the current default audio sink in PulseAudio. Emphasis on "the current default audio sink". If you have multiple sinks registered this application may not modify the volume of the sound output you are expecting. This is currently a limitation and the user will need to modify the default sink using a different application (probably [`pavucontrol`](https://freedesktop.org/software/pulseaudio/pavucontrol/)).
 
 ### Xresource Support
-This application supports reading the CSS colors for the SVG icon renderring from [Xresources](https://wiki.archlinux.org/title/X_resources). The user may also provide color changing arguments via the `--primary` and `--secondary` flags. The user can see which Xresource keys are most currently expected in [Xresources.h](src/Xresources.h). As of writing the application will query for the following keys:
+This application supports reading the CSS colors for the SVG icon renderring from [Xresources](https://wiki.archlinux.org/title/X_resources). The user may also provide color changing arguments via the `--primary-color` and `--secondary-color` flags. The user can see which Xresource keys are most currently expected in [Xresources.h](src/Xresources.h). As of writing the application will query for the following keys:
 
 - pavol-dunst.primaryColor: _valid CSS color_
 - pavol-dunst.secondaryColor: _valid CSS color_
