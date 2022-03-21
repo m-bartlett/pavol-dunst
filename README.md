@@ -18,7 +18,7 @@ A keybindable application to modify volume levels on audio sinks within PulseAud
       width="250px"
       alt="Xresource color example 2"
       title="Xresource color example 2"
-      src="https://user-images.githubusercontent.com/85039141/159217596-2e964021-0091-4114-a83c-32a36f686391.jpg"
+      src="https://user-images.githubusercontent.com/85039141/159217603-d813ae03-9390-48ea-bc97-3f9228d2730f.jpg"
     >
     <img
       width="250px"
@@ -32,19 +32,19 @@ A keybindable application to modify volume levels on audio sinks within PulseAud
       width="250px"
       alt="Xresource color example 4"
       title="Xresource color example 4"
-      src="https://user-images.githubusercontent.com/85039141/159217598-f1abcdf2-1b9c-4684-95c9-3423adda6866.jpg"
+      src="https://user-images.githubusercontent.com/85039141/159217600-0f7ce327-d5d1-4727-a366-38b4ea239d20.jpg"
     >
     <img
       width="250px"
       alt="Xresource color example 5"
       title="Xresource color example 5"
-      src="https://user-images.githubusercontent.com/85039141/159217597-245293b9-d4f5-4ecc-b88f-46d555c83951.jpg"
+      src="https://user-images.githubusercontent.com/85039141/159217598-f1abcdf2-1b9c-4684-95c9-3423adda6866.jpg"
     >
     <img
       width="250px"
       alt="Xresource color example 6"
       title="Xresource color example 6"
-      src="https://user-images.githubusercontent.com/85039141/159217600-0f7ce327-d5d1-4727-a366-38b4ea239d20.jpg"
+      src="https://user-images.githubusercontent.com/85039141/159217596-2e964021-0091-4114-a83c-32a36f686391.jpg"
     >
   </span>
   <span>
@@ -58,7 +58,7 @@ A keybindable application to modify volume levels on audio sinks within PulseAud
       width="250px"
       alt="Xresource color example 8"
       title="Xresource color example 8"
-      src="https://user-images.githubusercontent.com/85039141/159217603-d813ae03-9390-48ea-bc97-3f9228d2730f.jpg"
+      src="https://user-images.githubusercontent.com/85039141/159217597-245293b9-d4f5-4ecc-b88f-46d555c83951.jpg"
     >
     <img
       width="250px"
