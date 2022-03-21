@@ -7,8 +7,8 @@ TARGET := pavol-dunst
 LIBS     := pulse
 PKG_LIBS := libnotify xcb-xrm librsvg-2.0 gdk-3.0     # pkg-config --list-all
 
-CC        := g++
-CFLAGS    := $(shell pkg-config --cflags $(PKG_LIBS))
+CC        := gcc
+CFLAGS    := $(shell pkg-config --cflags $(PKG_LIBS)) -std=gnu++11 -fno-threadsafe-statics
 LIB_FLAGS := $(shell pkg-config --libs $(PKG_LIBS))
 LIB_FLAGS += $(addprefix -l, $(LIBS))
 
