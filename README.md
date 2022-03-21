@@ -68,7 +68,7 @@ A keybindable application to modify volume levels on audio sinks within PulseAud
     >
   </span>
   <br/>
-  <sub>These color schemes are achieved using this application's <a href="#xresource-support">Xresource support</a> and my project <a href="https://github.com/m-bartlett/wpal">wpal</a> which generates color palettes with the desktop wallpaper and exports the colors to Xresources.</sub>
+  <sub>These color schemes are achieved using this application's <a href="#xresource-support">Xresource support</a> and my project <a href="https://github.com/m-bartlett/wpal">wpal</a> which generates color palettes from the desktop wallpaper and exports the colors to Xresources.</sub>
 </p>
 
 ## Install
