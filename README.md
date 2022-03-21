@@ -1,5 +1,5 @@
 # pavol-dunst
-An application to modify volume levels on audio sinks within Pulse Audio with dunst-centric libnotify integrations to display performant volume notifications in [dunst](https://github.com/dunst-project/dunst/).
+An keybindable application to modify volume levels on audio sinks within PulseAudio with dunst-centric libnotify integrations to display performant volume notifications in [dunst](https://github.com/dunst-project/dunst/).
 
 This was inspired by [pavol](https://github.com/dturing/pavol) and [pavolume](https://github.com/andornaut/pavolume).
 <!-- https://user-images.githubusercontent.com/85039141/159208878-e6c3814c-cab9-44f0-8529-aa66afdc8f03.mp4 -->
