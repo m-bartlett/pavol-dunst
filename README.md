@@ -9,6 +9,63 @@ This was inspired by [pavol](https://github.com/dturing/pavol) and [pavolume](ht
 <br/><sub>on-screen keyboard input display software is <a href="https://github.com/critiqjo/key-mon">key-mon</a></sub>
 </p>
 
+<span>
+  <img
+    width="200px"
+    alt="Xresource color example 1"
+    title="Xresource color example 1"
+    src="https://user-images.githubusercontent.com/85039141/159217593-700adb57-1bd9-4d52-8660-2362159d00dd.jpg"
+  >
+  <img
+    width="200px"
+    alt="Xresource color example 2"
+    title="Xresource color example 2"
+    src="https://user-images.githubusercontent.com/85039141/159217596-2e964021-0091-4114-a83c-32a36f686391.jpg"
+  >
+  <img
+    width="200px"
+    alt="Xresource color example 3"
+    title="Xresource color example 3"
+    src="https://user-images.githubusercontent.com/85039141/159217597-245293b9-d4f5-4ecc-b88f-46d555c83951.jpg"
+  >
+  <img
+    width="200px"
+    alt="Xresource color example 4"
+    title="Xresource color example 4"
+    src="https://user-images.githubusercontent.com/85039141/159217598-f1abcdf2-1b9c-4684-95c9-3423adda6866.jpg"
+  >
+  <img
+    width="200px"
+    alt="Xresource color example 5"
+    title="Xresource color example 5"
+    src="https://user-images.githubusercontent.com/85039141/159217599-6f1f9cdd-235c-4f74-a626-f631800f4d3f.jpg"
+  >
+  <img
+    width="200px"
+    alt="Xresource color example 6"
+    title="Xresource color example 6"
+    src="https://user-images.githubusercontent.com/85039141/159217600-0f7ce327-d5d1-4727-a366-38b4ea239d20.jpg"
+  >
+  <img
+    width="200px"
+    alt="Xresource color example 7"
+    title="Xresource color example 7"
+    src="https://user-images.githubusercontent.com/85039141/159217602-a18ba988-bb28-4f97-9173-3b883b9ac10a.jpg"
+  >
+  <img
+    width="200px"
+    alt="Xresource color example 8"
+    title="Xresource color example 8"
+    src="https://user-images.githubusercontent.com/85039141/159217603-d813ae03-9390-48ea-bc97-3f9228d2730f.jpg"
+  >
+  <img
+    width="200px"
+    alt="Xresource color example 9"
+    title="Xresourcece color example 9"
+    src="https://user-images.githubusercontent.com/85039141/159217604-722ccbf2-a4e9-4696-87fe-8516196592d8.jpg"
+  >
+</span>
+
 ## Install
 Succinctly:
 ```sh
