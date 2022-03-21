@@ -1,13 +1,29 @@
 # pavol-dunst
-A fork of [pavol](https://github.com/dturing/pavol) and [pavolume](https://github.com/andornaut/pavolume) with dunst-centric libnotify integrations to display performant volume notifications in [dunst](https://github.com/dunst-project/dunst/).
+An application to modify volume levels on audio sinks within Pulse Audio with dunst-centric libnotify integrations to display performant volume notifications in [dunst](https://github.com/dunst-project/dunst/).
 
-![demo](https://user-images.githubusercontent.com/85039141/143789483-ebb2ee4f-c4d4-48c2-9476-1b6da7ea4bb7.gif)
+This was inspired by [pavol](https://github.com/dturing/pavol) and [pavolume](https://github.com/andornaut/pavolume).
+<!-- https://user-images.githubusercontent.com/85039141/159208878-e6c3814c-cab9-44f0-8529-aa66afdc8f03.mp4 -->
 
-<sub>on-screen keyboard input display software is [key-mon](https://github.com/critiqjo/key-mon)</sub>
+<p align="center">
+<img src="https://user-images.githubusercontent.com/85039141/159210149-61b51c1f-6674-4aaf-9589-3f7906c8c507.gif">
+<br/><sub>on-screen keyboard input display software is <a href="https://github.com/critiqjo/key-mon">key-mon</a></sub>
+</p>
 
 ## About
 
 ### Custom Icons
+
+In theory this application supports adding custom icons, however this was not intended as a first-class feature. Consequently, there is no minification pipeline to reduce the embedded SVG string body sizes. This application renders icon colors dynamically by implementing CSS classes that get passed to the RSVG rendering backend. To reduce compiled binary size, these CSS classes are not named verbosely. One may find the raw CSS stylesheet string that gets passed to the icon rendering in [`svg.cpp`](svg.cpp), however a more semantically expressive version follows:
+```css
+* { --primary: #fff; --secondary: #888; } /* librsvg doesn't support var() in stylesheet rendering, this is just for explanation */
+.A { fill: var(--primary); stroke:none }  /* class A is "fill this path with the primary color */
+/* Currently no icons need filled with the secondary color, but I would use class B to represent that */
+.a {stroke: var(--primary)}               /* class "a" is "stroke this path with the primary color" */
+.b {stroke: var(--secondary)}             /* class "b" is "stroke this path with the secondary color" */
+.a,.b {stroke-width:.378; fill:none}      /* these styles apply to any strokes (irrelvant to fill styles) */
+```
+
+As such your custom icons should implement classes `A`, `a`, and `b` to with the current code to render properly with the application's color arguments.
 
 ### PulseAudio Support
 
