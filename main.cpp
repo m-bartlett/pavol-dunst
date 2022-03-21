@@ -31,7 +31,7 @@ static int usage(char *argv[]) {
     "  [-t|--timeout] MILLISECONDS - end volume notification after MILLISECONDS milliseconds.\n"
     "  [-b|--body] BODY - set volume notification body to whatever string is provided as BODY.\n"
     "  [-u|--unlock]\n"
-    "    This process uses shared memory to set a process mutually-exclusive (mutex) lock. If the process unexpectedly exits due to an unforeseen error, this single-process lock memory might be locked and not unlocked due to the unexpected exit. If you see an error message claiming the process mutex is locked when no other iteration of this process is running, then use this flag to forcibly unlock the process mutex. This flag may also be provided to disable the single-process mutex lock feature entirely. This is simply to prevent \"jumpy\" audio level fluctuations if the users spawns too many iterations of this process (e.g. by holding down a keyboard key that this process is bound to, and the audio source is a bluetooth device which takes a decent amount of time to update the volume of).\n"
+    "    Forcibly unlock (or prevent the locking of) the shared-memory mutex lock that prevents concurrent instances of this process from running. \n"
     "  [-P|--primary-color] CSS_COLOR - set volume notification icon primary color.\n"
     "    If this arg is unset it will be read from the Xresources key %s or a default value.\n"
     "  [-S|--secondary-color] CSS_COLOR - set volume notification icon secondary color.\n"
