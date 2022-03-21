@@ -11,6 +11,9 @@
 #include "processmutex.h"
 #include "Xresources.h"
 
+#define DEFAULT_NOTIFICATION_TIMEOUT 1500
+#define DEFAULT_ICON_SIZE 64
+
 static int usage(char *argv[]) {
   fprintf(stderr, "%s [-h] [-m [on|off|toggle] [-v [+|-]number]\n", argv[0]);
   return pulseaudio_quit(EXIT_FAILURE);
@@ -27,34 +30,16 @@ static bool parse_volume_argument(char *optarg, userdata_t &userdata) {
 }
 
 
-static void read_from_Xresources(userdata_t *userdata) {
-  Xresource_init();
-
-  if (userdata->icon_primary_color == NULL) {
-    static char* icon_primary_color = Xresource_get((char*)XRESOURCE_KEY_ICON_PRIMARY_COLOR);
-    if (icon_primary_color != NULL) userdata->icon_primary_color = icon_primary_color;
-    else icon_primary_color = (char*)"#fff";
-  }
-
-  if (userdata->icon_secondary_color == NULL) {
-    static char* icon_secondary_color = Xresource_get((char*)XRESOURCE_KEY_ICON_SECONDARY_COLOR);
-    if (icon_secondary_color != NULL) userdata->icon_secondary_color = icon_secondary_color;
-    else icon_secondary_color = (char*)"#888";
-  }
-
-  Xresource_close();
-}
-
-
 int main(int argc, char *argv[]) {
   userdata_t userdata = { .volume               = -1,
                           .new_volume           = -1,
                           .volume_delta         = false,
                           .mute                 = MUTE_UNKNOWN,
-                          .notification_timeout = 1500,
+                          .notification_timeout = DEFAULT_NOTIFICATION_TIMEOUT,
                           .notification_body    = (char*)"",
                           .icon_primary_color   = NULL,
-                          .icon_secondary_color = NULL };
+                          .icon_secondary_color = NULL,
+                          .icon_size            = DEFAULT_ICON_SIZE };
   bool process_mutex = true;
 
   /*
@@ -79,11 +64,12 @@ int main(int argc, char *argv[]) {
     {"unlock",          required_argument, /*flag=*/NULL, /*return_val=*/'u'},
     {"primary-color",   required_argument, /*flag=*/NULL, /*return_val=*/'P'},
     {"secondary-color", required_argument, /*flag=*/NULL, /*return_val=*/'S'},
+    {"icon-size",       required_argument, /*flag=*/NULL, /*return_val=*/'I'},
     {NULL,     0, NULL, 0}  // null entry indicates end of option array
   };
 
   int opt;
-  while ((opt = getopt_long(argc, argv, "-huv:m:b:t:P:S:", long_options, NULL) ) != -1) {
+  while ((opt = getopt_long(argc, argv, "-huv:m:b:t:P:S:I:", long_options, NULL) ) != -1) {
     switch (opt) {
 
       case 'h'/*elp*/: return usage(argv);
@@ -118,8 +104,13 @@ int main(int argc, char *argv[]) {
         userdata.icon_primary_color = optarg;
         break;
 
-      case 'S'/*secondary*/:
+      case 'S'/*econdary*/:
         userdata.icon_secondary_color = optarg;
+        break;
+
+      case 'I'/*con sIze*/:
+        userdata.icon_size = atof(optarg);
+        if (userdata.icon_size <= 0) userdata.icon_size = DEFAULT_ICON_SIZE;
         break;
 
       default:
