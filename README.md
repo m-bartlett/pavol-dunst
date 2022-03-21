@@ -71,6 +71,24 @@ A keybindable application to modify volume levels on audio sinks within PulseAud
   <sub>These color schemes use this application's <a href="#xresource-support">Xresource support</a> and my project <a href="https://github.com/m-bartlett/wpal">wpal</a> which exports color palettes generated from the desktop wallpaper to Xresources.</sub>
 </p>
 
+---
+
+### Table of Contents
+* [Install](#install)
+* [Usage](#usage)
+  * [CLI Arguments](#cli-arguments)
+  * [Dunstrc config](#dunstrc-config)
+  * [Extra](#extra)
+* [About](#about)
+  * [Key Binding](#key-binding)
+  * [Custom Icons](#custom-icons)
+  * [PulseAudio Support](#pulseaudio-support)
+  * [Xresource Support](#xresource-support)
+  * [Shared Memory Singleton-Process Mutex Lock](#shared-memory-singleton-process-mutex-lock)
+  * [Developer Notes](#developer-notes)
+
+---
+
 ## Install
 Succinctly:
 ```sh
