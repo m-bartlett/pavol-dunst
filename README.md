@@ -9,6 +9,56 @@ This was inspired by [pavol](https://github.com/dturing/pavol) and [pavolume](ht
 <br/><sub>on-screen keyboard input display software is <a href="https://github.com/critiqjo/key-mon">key-mon</a></sub>
 </p>
 
+## Install
+Run `make` to execute a multi-threaded build by default, or alternatively run `make pavol-dunst`.
+
+After successful compilation, run `sudo make install`. Succinctly, `make && sudo make install`.
+
+If you do not have `sudo` privileges then modify the `PREFIX` variable, for example: `PREFIX=$HOME/.local make install`
+
+## Usage
+
+See `pavol-dunst --help` for documentation on the various command flags:
+```
+  [-h|--help] - print this usage information and exit
+  
+  [-m|--mute] [ [1|"on"] | [0|"off"] | [-1|"toggle"] ]
+      Mute audio if arg is "1" or "on"
+      Unmute audio if arg is "0" or "off"
+      Toggle audio muted if arg is "-1" or "toggle"
+      
+  [-v|--volume] [+|-]VAL
+      If arg starts with "+" increase by VAL -> +5 is current volume + 5
+      If arg starts with "-" decrease by VAL -> -7 is current volume - 7
+      Set absolute VAL if neither "+" or "-" are present -> 50 sets volume to 50
+      
+  [-t|--timeout] MILLISECONDS - end volume notification after MILLISECONDS milliseconds.
+  
+  [-b|--body] BODY - set volume notification body to whatever string is provided as BODY.
+  
+  [-u|--unlock]
+      Forcibly unlock (or prevent the locking of) the shared-memory mutex lock that prevents
+      concurrent instances of this process from running.
+      
+  [-P|--primary-color] CSS_COLOR - set volume notification icon primary color.
+      If this arg is unset it will be read from the Xresources key pavol-dunst.primaryColor
+      or a default value.
+      
+  [-S|--secondary-color] CSS_COLOR - set volume notification icon secondary color.
+      If this arg is unset it will be read from the Xresources key pavol-dunst.secondaryColor
+      or a default value.
+      
+  [-I|--icon-size] PIXELS - render volume notification icon size to be PIXELS pixels big.
+```
+
+For extra usage details please see the
+[Shared Memory Single-Process Mutex Lock](#shared-memory-single-process-mutex-lock),
+[PulseAudio Support](#pulseaudio-support),
+and
+[Xresource Support](#xresource-support)
+sections below.
+
+
 ## About
 
 ### Key Binding
