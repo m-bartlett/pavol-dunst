@@ -149,7 +149,7 @@ In theory this application supports adding custom icons, however this was not in
 .a,.b {stroke-width:.378; fill:none}      /* these styles apply to any strokes (irrelvant to fill styles) */
 ```
 
-As such your custom icons should implement classes `A`, `a`, and `b` to with the current code to render properly with the application's color arguments.
+As such your custom icons should implement classes `A`, `a`, and `b` to work with the current code to render properly with the application's color arguments.
 
 For reference, here was a previous possible icon set I designed myself, you may use these under the same [license](LICENSE) as the rest of this repository.
 
