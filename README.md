@@ -195,7 +195,7 @@ bindsym XF86AudioMute        exec --no-startup-id pavol-dunst -m toggle
 ```
 
 ### Custom Icons
-In theory this application supports adding custom icons, however this was not intended as a first-class feature. Consequently, there is no minification pipeline to reduce the embedded SVG string body sizes. This application renders icon colors dynamically by implementing CSS classes that get passed to the RSVG rendering backend. To reduce compiled binary size, these CSS classes are not named verbosely. One may find the raw CSS stylesheet string that gets passed to the icon rendering in [`svg.cpp`](src/svg.cpp), however a more semantically expressive version follows:
+In theory this application supports adding custom icons, simply modify the .svg files in [`svg/`](src/svg/). However, this was not intended as a first-class feature so there is no minification pipeline to reduce the embedded SVG string body sizes (the user will need to manually minify their SVGs). This application renders icon colors dynamically by implementing CSS classes referenced in the CSS stylesheet that get passed to the RSVG rendering backend. To reduce compiled binary size, these CSS classes are currently named with just a single character. One may find the raw CSS stylesheet string that gets passed to the icon rendering in [`svg.cpp`](src/svg.cpp), however a more semantically expressive version follows:
 ```css
 * { --primary: #fff; --secondary: #888; } /* librsvg doesn't support var() in stylesheet rendering, this is just for explanation */
 .A { fill: var(--primary); stroke:none }  /* class A is "fill this path with the primary color */
