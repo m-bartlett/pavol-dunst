@@ -1,5 +1,0 @@
-[x] overamplification icon + looping progress bar
-[ ] Xresources for icon paths for light vs dark
-[ ] Xresources for whether it's currently a light or dark theme
-[-] Send notification with current volume right before volume delta to display the change
-  - Not super feasible
