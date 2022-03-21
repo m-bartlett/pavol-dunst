@@ -3,7 +3,7 @@ A keybindable application to modify volume levels on audio sinks within PulseAud
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/85039141/159210149-61b51c1f-6674-4aaf-9589-3f7906c8c507.gif">
-<br/><sub>on-screen keyboard input display software is <a href="https://github.com/critiqjo/key-mon">key-mon</a></sub>
+<br/><sub><i>on-screen keyboard input display software is <a href="https://github.com/critiqjo/key-mon">key-mon</a></i></sub>
 </p>
 <br/><br/>
 <p align="center">
