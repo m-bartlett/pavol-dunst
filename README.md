@@ -88,6 +88,7 @@ A keybindable application to modify volume levels on audio sinks within PulseAud
   * [Xresource Support](#xresource-support)
   * [Shared Memory Singleton-Process Mutex Lock](#shared-memory-singleton-process-mutex-lock)
   * [Developer Notes](#developer-notes)
+  * [To Do](#to-do)
 
 ---
 
@@ -242,3 +243,6 @@ If the process unexpectedly exits due to an unforeseen error, this single-proces
 ### Developer Notes
 
 When scaling the rendered SVG to GdkPixBuf&mdash;especially in the context of creating an icon for libnotify&mdash;it seemed obvious to me that the appropriate function to reference the allocated pixbuf would be `rsvg_handle_get_pixbuf` using the RSVG handle containing the rendered graphic. However this function failed to produce a re-scaled image, i.e. the resulting icon was always whatever the intrinsic document scale was despite passing in differing viewbox values. As a workaround, I found that rendering to the cairo surface directly and then producing the pixbuf from the cairo surface was successful in producing a re-scaled image. In short, using the pixbuf from `gdk_pixbuf_get_from_surface` as the notification icon was sufficient to enable dynamic image scaling. This required linking the gdk main library.
+
+### To Do
+View the [new feature kanban](https://github.com/m-bartlett/pavol-dunst/projects/1) to follow what ideas for features exist and their integration progress.
