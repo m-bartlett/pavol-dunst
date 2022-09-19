@@ -36,7 +36,7 @@ int pulseaudio_quit(int new_pa_retval) {
 }
 
 
-void wait_loop(pa_operation *op) {
+void pa_wait_loop(pa_operation *op) {
   while (pa_operation_get_state(op) == PA_OPERATION_RUNNING)
     if (pa_mainloop_iterate(mainloop, 1, &pa_retval) < 0) break;
   pa_operation_unref(op);
@@ -58,7 +58,7 @@ pa_volume_t denormalize(int volume) {
 }
 
 
-void set_volume_callback( pa_context *context,
+void callback__set_volume( pa_context *context,
                           const pa_sink_info *sink_info,
                           __attribute__((unused)) int eol,
                           void *pulseaudio_userdata ) {
@@ -84,7 +84,7 @@ void set_volume_callback( pa_context *context,
       break;
   }
 
-  // Turn muting off on any volume change, unless muting was specifically turned on or toggled.
+  // /* Turn muting off on any volume change, unless muting was specifically turned on or toggled. */
   // if (!userdata->is_mute_on && !userdata->is_mute_toggle)
     // pa_context_set_sink_mute_by_index(context, sink_info->index, 0, NULL, NULL);
 
@@ -113,7 +113,7 @@ void set_volume_callback( pa_context *context,
   pa_context_set_sink_volume_by_index(context, sink_info->index, new_cvolume, NULL, NULL);
 }
 
-void get_server_info_callback( __attribute__((unused)) pa_context *context,
+void callback__get_server_info( __attribute__((unused)) pa_context *context,
                                const pa_server_info *sink_info,
                                void *userdata ) {
   if (sink_info == NULL) return;

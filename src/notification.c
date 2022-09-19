@@ -5,7 +5,7 @@
 #include "svg.h"
 
 const char NOTIFICATION_BODY_FORMAT[] = NOTIFICATION_LITERAL_BODY_FORMAT;
-const int   NOTIFICATION_BODY_FORMAT_SIZE = strlen(NOTIFICATION_BODY_FORMAT) - 2;
+const int  NOTIFICATION_BODY_FORMAT_SIZE = strlen(NOTIFICATION_BODY_FORMAT) - 2;
 
 const guint8* icon_bodies[] = { (guint8*) silent_svg_raw,
                                 (guint8*)    low_svg_raw,

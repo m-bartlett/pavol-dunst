@@ -289,7 +289,7 @@ This application supports reading the CSS colors for the SVG icon renderring fro
 
 For example the user may test this feature with:
 ```sh
-xrdb -merge <(echo -e "pavol-dunst.primaryColor: #f00 \n pavol-dunst.primaryColor: #0ff")
+xrdb -merge <(echo -e "pavol-dunst.primaryColor: #f00\npavol-dunst.secondaryColor: #0ff")
 ```
 
 

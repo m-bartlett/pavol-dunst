@@ -6,7 +6,12 @@
 
 #define NOTIFICATION_LITERAL_BODY_FORMAT      "<span>%s</span>"
 #define NOTIFICATION_LITERAL_CATEGORY         "volume"
-#define NOTIFICATION_LITERAL_HINT_SYNCHRONOUS "synchronous"
+#define NOTIFICATION_LITERAL_HINT_STACKTAG    "synchronous"
+/* Alternative stacktag values supported by dunst to replace an existing notification:
+ #define NOTIFICATION_LITERAL_HINT_STACKTAG   "private-synchronous",
+ #define NOTIFICATION_LITERAL_HINT_STACKTAG   "x-canonical-private-synchronous",
+ #define NOTIFICATION_LITERAL_HINT_STACKTAG   "x-dunst-stack-tag",
+*/
 #define NOTIFICATION_LITERAL_HINT_VALUE       "value"
 
 extern const char NOTIFICATION_BODY_FORMAT[];
