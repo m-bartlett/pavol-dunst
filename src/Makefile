@@ -22,6 +22,13 @@ OBJECTS   := $(SOURCES:.c=.o)
 ICON_SVGS  := $(wildcard svg/*.svg)
 ICON_HEADERS  := $(patsubst svg/%.svg, icon/%.h, $(ICON_SVGS))
 
+FEATURES :=
+ifneq ($(ENABLE_TRANSIENT_HINT),)
+	FEATURES += -DENABLE_TRANSIENT_HINT
+endif
+ifneq ($(FORMAT_VOLUME_IN_NOTIFICATION_BODY),)
+	FEATURES += -DFORMAT_VOLUME_IN_NOTIFICATION_BODY
+endif
 
 all:	# Multi-threaded make by default
 	$(MAKE) -j $(shell nproc) $(TARGET)
@@ -35,7 +42,7 @@ $(TARGET): $(OBJECTS)
 $(OBJECTS): $(SOURCES) $(HEADERS) $(ICON_HEADERS)
 
 %.o: %.c
-	$(CC) $(CFLAGS) $(LDFLAGS) $(LIB_FLAGS) -c $< -o $@
+	$(CC) $(FEATURES) $(CFLAGS) $(LDFLAGS) $(LIB_FLAGS) -c $< -o $@
 
 $(SOURCES): $(MAKEFILE) # If Makefile changes, recompile
 	@touch $(SOURCES)

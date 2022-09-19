@@ -82,6 +82,7 @@ A keybindable application to modify volume levels on audio sinks within PulseAud
   * [Dunstrc config](#dunstrc-config)
   * [Extra](#extra)
 * [About](#about)
+  * [Optional Features](#optional-features)
   * [Key Binding](#key-binding)
   * [Custom Icons](#custom-icons)
   * [PulseAudio Support](#pulseaudio-support)
@@ -182,6 +183,64 @@ sections below.
 
 
 ## About
+
+### Optional Features
+There are certain features which can be enabled at compile-time. These are features that would would add overhead to the generation and display of the notification if they were specified with a boolean CLI flag, and are generally things that users would either he interested in having all the time or never. The feature inclusion is ultimately decided by the preprocessor, but I've added some logic in the `Makefile` to make it simpler for the user to specify the inclusion of these optional features.
+
+From the table below, export the **Feature name variable** value as a non-empty value to `make`. Note that specifying a feature variable *after* building will not indicate to `make` that it needs to rebuild; one should use the `-B` flag to force `make` to rebuild.
+
+For example, to enable the `FORMAT_VOLUME_IN_NOTIFICATION_BODY` feature, I would recommend executing:
+`FORMAT_VOLUME_IN_NOTIFICATION_BODY=1 make -B`
+
+<br/>
+
+<table>
+    <tr align="center">
+        <th>Feature name variable</th>
+        <th>Feature description</th>
+        <th>Example</th>
+    </tr>
+    <tr>
+        <td><code>ENABLE_TRANSIENT_HINT</code></td>
+        <td>Transient notifications will still timeout even if the user is considered idle. The default <code>dunst</code> config disables idle timeout, so only enable this if you use this dunst feature and would like volume notifications to still disappear.</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td><code>FORMAT_VOLUME_IN_NOTIFICATION_BODY</code></td>
+        <td>
+
+Support formatting the volume percentage integer into the notification body. This literally runs `sprintf` with the volume integer as an argument. For example with a body argument of `~%d~` and the current volume being 25, the resulting notification body would show `~25~`. <br/>**WARNING**: This feature has no sanitation of the user provided body value. If you provide any formatter besides `%d` expect to get a segmentation fault.
+
+</td>
+        <td>
+          <table>
+              <tr align="center">
+                  <th>Disabled</th>
+              </tr>
+              <tr>
+                  <td>
+                      <img  alt="Body NOT formatted with volume"
+                            title="Body NOT formatted with volume"
+                            width="220"
+                            src="https://user-images.githubusercontent.com/85039141/190920774-58d4c9db-417e-4fe5-88d2-be387d1b4247.png">
+                  </td>
+              </tr>
+              <tr align="center">
+                  <th>Enabled</th>
+              </tr>
+              <tr>
+                  <td>
+                      <img  alt="Body formatted with volume"
+                            title="Body formatted with volume"
+                            width="220"
+                            src="https://user-images.githubusercontent.com/85039141/190920714-15924138-fe49-46b5-aede-16d71d968b69.png">
+                  </td>
+              </tr>
+          </table>
+        </td>
+    </tr>
+</table>
+
 
 ### Key Binding
 This will obviously depend on your Linux distribution, desktop environment, and preferred means of creating global keyboard shortcuts.
