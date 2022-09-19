@@ -300,4 +300,30 @@ If the process unexpectedly exits due to an unforeseen error, this single-proces
 
 ### Developer Notes
 
-When scaling the rendered SVG to GdkPixBuf&mdash;especially in the context of creating an icon for libnotify&mdash;it seemed obvious to me that the appropriate function to reference the allocated pixbuf would be `rsvg_handle_get_pixbuf` using the RSVG handle containing the rendered graphic. However this function failed to produce a re-scaled image, i.e. the resulting icon was always whatever the intrinsic document scale was despite passing in differing viewbox values. As a workaround, I found that rendering to the cairo surface directly and then producing the pixbuf from the cairo surface was successful in producing a re-scaled image. In short, using the pixbuf from `gdk_pixbuf_get_from_surface` as the notification icon was sufficient to enable dynamic image scaling. This required linking the gdk main library.
+- [List of all hints supported by dunst](https://dunst-project.org/documentation/#NOTIFY-SEND)
+
+- When scaling the rendered SVG to GdkPixBuf&mdash;especially in the context of creating an icon for libnotify&mdash;it seemed obvious to me that the appropriate function to reference the allocated pixbuf would be `rsvg_handle_get_pixbuf` using the RSVG handle containing the rendered graphic. However this function failed to produce a re-scaled image, i.e. the resulting icon was always whatever the intrinsic document scale was despite passing in differing viewbox values. As a workaround, I found that rendering to the cairo surface directly and then producing the pixbuf from the cairo surface was successful in producing a re-scaled image. In short, using the pixbuf from `gdk_pixbuf_get_from_surface` as the notification icon was sufficient to enable dynamic image scaling. This requires linking the gdk main library with `$ pkg-config --libs gdk-3.0`.
+
+- dunst 1.9.0 seems to now cache the icon image for synchronous notifications. This results in the notification icon not changing to reflect the volume magnitude visually if the process is executed again while the previous notification is still displayed despite having the image explicitly set. Recent releases of `pavol-dunst` add a workaround preventing this caching by first displaying a transparent image with the same dimensions and then updating the notification with the real image data with afterward. Caching the blank image should be easy for dunst, but the post-display update allows us to circumvent the notification caching and display the respective symbolic icon showing proportional volume level if `pavol-dunst` is executed in rapid succession
+
+- An alternative to `notify_notification_set_image_from_pixbuf` is using the `image-data` hint supported by `dunst`. This code was informed from the [test case for the `image-data` hint](https://github.com/dunst-project/dunst/blob/1280c9a9f20f46b24b08ebc99d29a788e5256a43/test/helpers.c#L7-L35):
+
+  ```C
+  GVariant *hint_data = g_variant_new_from_data(G_VARIANT_TYPE("ay"),
+                                                gdk_pixbuf_read_pixels(pixbuf),
+                                                gdk_pixbuf_get_byte_length(pixbuf),
+                                                TRUE,
+                                                (GDestroyNotify) g_object_unref,
+                                                g_object_ref(pixbuf));
+  GVariant *hint = g_variant_new(
+                          "(iiibii@ay)",
+                          gdk_pixbuf_get_width(pixbuf),
+                          gdk_pixbuf_get_height(pixbuf),
+                          gdk_pixbuf_get_rowstride(pixbuf),
+                          gdk_pixbuf_get_has_alpha(pixbuf),
+                          gdk_pixbuf_get_bits_per_sample(pixbuf),
+                          gdk_pixbuf_get_n_channels(pixbuf),
+                          hint_data);
+
+  notify_notification_set_hint(notification, "image-data", hint);
+  ```

@@ -62,15 +62,15 @@ static bool parse_volume_argument(char *optarg, userdata_t *userdata) {
 
 
 int main(int argc, char *argv[]) {
-  userdata_t userdata = { .volume               = -1,
-                          .new_volume           = -1,
-                          .volume_delta         = false,
-                          .mute                 = MUTE_UNKNOWN,
-                          .notification_timeout = DEFAULT_NOTIFICATION_TIMEOUT,
-                          .notification_body    = (char*)"",
-                          .icon_primary_color   = NULL,
-                          .icon_secondary_color = NULL,
-                          .icon_size            = DEFAULT_ICON_SIZE };
+  userdata_t userdata = {.volume               = -1,
+                         .new_volume           = -1,
+                         .volume_delta         = false,
+                         .mute                 = MUTE_UNKNOWN,
+                         .notification_timeout = DEFAULT_NOTIFICATION_TIMEOUT,
+                         .notification_body    = (char*)"",
+                         .icon_primary_color   = NULL,
+                         .icon_secondary_color = NULL,
+                         .icon_size            = DEFAULT_ICON_SIZE};
   bool process_mutex = true;
 
 
