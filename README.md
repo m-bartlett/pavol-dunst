@@ -185,7 +185,7 @@ sections below.
 ## About
 
 ### Optional Features
-There are certain features which can be enabled at compile-time. These are features that would would add overhead to the generation and display of the notification if they were specified with a boolean CLI flag, and are generally things that users would either he interested in having all the time or never. The feature inclusion is ultimately decided by the preprocessor, but I've added some logic in the `Makefile` to make it simpler for the user to specify the inclusion of these optional features.
+There are certain features which can be enabled at compile-time. These are features that would would add overhead to the generation and display of the notification if they were specified with a boolean CLI flag, and are generally things that users would either be interested in having all the time or never. The feature inclusion is ultimately decided by the preprocessor, but I've added some logic in the `Makefile` to make it simpler for the user to specify the inclusion of these optional features.
 
 From the table below, export the **Feature name variable** value as a non-empty value to `make`. Note that specifying a feature variable *after* building will not indicate to `make` that it needs to rebuild; one should use the `-B` flag to force `make` to rebuild.
 
