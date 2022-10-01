@@ -82,6 +82,7 @@ A keybindable application to modify volume levels on audio sinks within PulseAud
   * [Dunstrc config](#dunstrc-config)
   * [Extra](#extra)
 * [About](#about)
+  * [Optional Features](#optional-features)
   * [Key Binding](#key-binding)
   * [Custom Icons](#custom-icons)
   * [PulseAudio Support](#pulseaudio-support)
@@ -184,6 +185,64 @@ sections below.
 
 ## About
 
+### Optional Features
+There are certain features which can be enabled at compile-time. These are features that would would add overhead to the generation and display of the notification if they were specified with a boolean CLI flag, and are generally things that users would either be interested in having all the time or never. The feature inclusion is ultimately decided by the preprocessor, but I've added some logic in the `Makefile` to make it simpler for the user to specify the inclusion of these optional features.
+
+From the table below, export the **Feature name variable** value as a non-empty value to `make`. Note that specifying a feature variable *after* building will not indicate to `make` that it needs to rebuild; one should use the `-B` flag to force `make` to rebuild.
+
+For example, to enable the `FORMAT_VOLUME_IN_NOTIFICATION_BODY` feature, I would recommend executing:
+`FORMAT_VOLUME_IN_NOTIFICATION_BODY=1 make -B`
+
+<br/>
+
+<table>
+    <tr align="center">
+        <th>Feature name variable</th>
+        <th>Feature description</th>
+        <th>Example</th>
+    </tr>
+    <tr>
+        <td><code>ENABLE_TRANSIENT_HINT</code></td>
+        <td>Transient notifications will still timeout even if the user is considered idle. The default <code>dunst</code> config disables idle timeout, so only enable this if you use this dunst feature and would like volume notifications to still disappear.</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td><code>FORMAT_VOLUME_IN_NOTIFICATION_BODY</code></td>
+        <td>
+
+Support formatting the volume percentage integer into the notification body. This literally runs `sprintf` with the volume integer as an argument. For example with a body argument of `~%d~` and the current volume being 25, the resulting notification body would show `~25~`. <br/>**WARNING**: This feature has no sanitation of the user provided body value. If you provide any formatter besides `%d` expect to get a segmentation fault.
+
+</td>
+        <td>
+          <table>
+              <tr align="center">
+                  <th>Disabled</th>
+              </tr>
+              <tr>
+                  <td>
+                      <img  alt="Body NOT formatted with volume"
+                            title="Body NOT formatted with volume"
+                            width="220"
+                            src="https://user-images.githubusercontent.com/85039141/190920774-58d4c9db-417e-4fe5-88d2-be387d1b4247.png">
+                  </td>
+              </tr>
+              <tr align="center">
+                  <th>Enabled</th>
+              </tr>
+              <tr>
+                  <td>
+                      <img  alt="Body formatted with volume"
+                            title="Body formatted with volume"
+                            width="220"
+                            src="https://user-images.githubusercontent.com/85039141/190920714-15924138-fe49-46b5-aede-16d71d968b69.png">
+                  </td>
+              </tr>
+          </table>
+        </td>
+    </tr>
+</table>
+
+
 ### Key Binding
 This will obviously depend on your Linux distribution, desktop environment, and preferred means of creating global keyboard shortcuts.
 
@@ -231,7 +290,7 @@ This application supports reading the CSS colors for the SVG icon renderring fro
 
 For example the user may test this feature with:
 ```sh
-xrdb -merge <(echo -e "pavol-dunst.primaryColor: #f00 \n pavol-dunst.primaryColor: #0ff")
+xrdb -merge <(echo -e "pavol-dunst.primaryColor: #f00\npavol-dunst.secondaryColor: #0ff")
 ```
 
 
@@ -242,7 +301,33 @@ If the process unexpectedly exits due to an unforeseen error, this single-proces
 
 ### Developer Notes
 
-When scaling the rendered SVG to GdkPixBuf&mdash;especially in the context of creating an icon for libnotify&mdash;it seemed obvious to me that the appropriate function to reference the allocated pixbuf would be `rsvg_handle_get_pixbuf` using the RSVG handle containing the rendered graphic. However this function failed to produce a re-scaled image, i.e. the resulting icon was always whatever the intrinsic document scale was despite passing in differing viewbox values. As a workaround, I found that rendering to the cairo surface directly and then producing the pixbuf from the cairo surface was successful in producing a re-scaled image. In short, using the pixbuf from `gdk_pixbuf_get_from_surface` as the notification icon was sufficient to enable dynamic image scaling. This required linking the gdk main library.
+- [List of all hints supported by dunst](https://dunst-project.org/documentation/#NOTIFY-SEND)
 
+- When scaling the rendered SVG to GdkPixBuf&mdash;especially in the context of creating an icon for libnotify&mdash;it seemed obvious to me that the appropriate function to reference the allocated pixbuf would be `rsvg_handle_get_pixbuf` using the RSVG handle containing the rendered graphic. However this function failed to produce a re-scaled image, i.e. the resulting icon was always whatever the intrinsic document scale was despite passing in differing viewbox values. As a workaround, I found that rendering to the cairo surface directly and then producing the pixbuf from the cairo surface was successful in producing a re-scaled image. In short, using the pixbuf from `gdk_pixbuf_get_from_surface` as the notification icon was sufficient to enable dynamic image scaling. This requires linking the gdk main library with `$ pkg-config --libs gdk-3.0`.
+
+- dunst 1.9.0 seems to now cache the icon image for synchronous notifications. This results in the notification icon not changing to reflect the volume magnitude visually if the process is executed again while the previous notification is still displayed despite having the image explicitly set. Recent releases of `pavol-dunst` add a workaround preventing this caching by first displaying a transparent image with the same dimensions and then updating the notification with the real image data with afterward. Caching the blank image should be easy for dunst, but the post-display update allows us to circumvent the notification caching and display the respective symbolic icon showing proportional volume level if `pavol-dunst` is executed in rapid succession
+
+- An alternative to `notify_notification_set_image_from_pixbuf` is using the `image-data` hint supported by `dunst`. This code was informed from the [test case for the `image-data` hint](https://github.com/dunst-project/dunst/blob/1280c9a9f20f46b24b08ebc99d29a788e5256a43/test/helpers.c#L7-L35):
+
+  ```C
+  GVariant *hint_data = g_variant_new_from_data(G_VARIANT_TYPE("ay"),
+                                                gdk_pixbuf_read_pixels(pixbuf),
+                                                gdk_pixbuf_get_byte_length(pixbuf),
+                                                TRUE,
+                                                (GDestroyNotify) g_object_unref,
+                                                g_object_ref(pixbuf));
+  GVariant *hint = g_variant_new(
+                          "(iiibii@ay)",
+                          gdk_pixbuf_get_width(pixbuf),
+                          gdk_pixbuf_get_height(pixbuf),
+                          gdk_pixbuf_get_rowstride(pixbuf),
+                          gdk_pixbuf_get_has_alpha(pixbuf),
+                          gdk_pixbuf_get_bits_per_sample(pixbuf),
+                          gdk_pixbuf_get_n_channels(pixbuf),
+                          hint_data);
+
+  notify_notification_set_hint(notification, "image-data", hint);
+  ```
 ### To Do
+
 View the [new feature kanban](https://github.com/m-bartlett/pavol-dunst/projects/1) to follow what ideas for features exist and their integration progress.

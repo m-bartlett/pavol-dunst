@@ -40,14 +40,29 @@ bool render_notification_icon(NotifyNotification* notification,
 
   cairo_surface_flush(surface);
 
-  // GdkPixbuf* pixbuf = rsvg_handle_get_pixbuf(rsvg_handle);   // <- this doesn't scale image
+  // GdkPixbuf* pixbuf = rsvg_handle_get_pixbuf(rsvg_handle);   // <- this doesn't scale the image
   GdkPixbuf* pixbuf = gdk_pixbuf_get_from_surface (surface, 0, 0, icon_size, icon_size);
 
+  /* <HACK>: dunst wants to cache the icon image for synchronous notifications. This results in the notification icon
+             not changing to reflect the volume magnitude visually if the process is executed again while the previous
+             notification is still displayed. This workaround prevents this caching by first displaying a transparent
+             image with the same dimensions and then updating the notification with the real image data with afterward.
+  */
+  GdkPixbuf* placeholder = gdk_pixbuf_new(GDK_COLORSPACE_RGB,
+                                          /*has_alpha*/ true,
+                                          gdk_pixbuf_get_bits_per_sample(pixbuf),
+                                          /*width*/  icon_size,
+                                          /*height*/ icon_size);
+  notify_notification_set_image_from_pixbuf(notification, placeholder);
+  notify_notification_show(notification, NULL);
   notify_notification_set_image_from_pixbuf(notification, pixbuf);
+  /* </HACK> */
 
-  cairo_destroy (cairo);
-  cairo_surface_destroy (surface);
+
+  cairo_destroy(cairo);
+  cairo_surface_destroy(surface);
   g_object_unref(rsvg_handle);
+  g_object_unref(placeholder);
   g_object_unref(pixbuf);
   return true;
 }

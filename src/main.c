@@ -1,9 +1,9 @@
 #include <errno.h>
 #include <getopt.h>
-#include <stdbool.h>
-#include <stdlib.h> // EXIT_*
-#include <stdio.h>  // printf
-#include <string.h> // strcpy
+#include <stdbool.h> // "true"
+#include <stdlib.h>  // EXIT_OK/EXIT_FAILURE
+#include <stdio.h>   // printf
+#include <string.h>  // strcpy
 
 #include "userdata.h"
 #include "notification.h"
@@ -21,27 +21,32 @@ static int usage(char *argv[]) {
     "%s\n"
     "  [-h|--help] - print this usage information and exit\n"
     "  [-m|--mute] [ [1|\"on\"] | [0|\"off\"] | [-1|\"toggle\"] ]\n"
-    "    mute audio if arg is \"1\" or \"on\"\n"
-    "    unmute audio if arg is \"0\" or \"off\"\n"
-    "    toggle audio muted if arg is \"-1\" or \"toggle\"\n"
+    "      mute audio if arg is \"1\" or \"on\"\n"
+    "      unmute audio if arg is \"0\" or \"off\"\n"
+    "      toggle audio muted if arg is \"-1\" or \"toggle\"\n"
     "  [-v|--volume] [+|-]VAL\n"
-    "    if arg starts with \"+\" increase by VAL -> +5 is current volume + 5\n"
-    "    if arg starts with \"-\" decrease by VAL -> -7 is current volume - 7\n"
-    "    set absolute VAL if neither \"+\" or \"-\" are present -> 50 sets volume to 50\n"
+    "      if arg starts with \"+\" increase by VAL -> +5 is current volume + 5\n"
+    "      if arg starts with \"-\" decrease by VAL -> -7 is current volume - 7\n"
+    "      set absolute VAL if neither \"+\" or \"-\" are present -> 50 sets volume to 50\n"
     "  [-t|--timeout] MILLISECONDS - end volume notification after MILLISECONDS milliseconds.\n"
     "  [-b|--body] BODY - set volume notification body to whatever string is provided as BODY.\n"
     "  [-u|--unlock]\n"
-    "    Forcibly unlock (or prevent the locking of) the shared-memory mutex lock that prevents concurrent instances of this process from running. \n"
+    "      Forcibly unlock (or prevent the locking of) the shared-memory mutex lock that\n"
+    "      prevents concurrent instances of this process from running.\n"
     "  [-P|--primary-color] CSS_COLOR - set volume notification icon primary color.\n"
-    "    If this arg is unset it will be read from the Xresources key %s or a default value.\n"
+    "      If this arg is unset it will be read from the Xresources key %s or a default value.\n"
     "  [-S|--secondary-color] CSS_COLOR - set volume notification icon secondary color.\n"
-    "    If this arg is unset it will be read from the Xresources key %s or a default value.\n"
+    "      If this arg is unset it will be read from the Xresources key %s or a default value.\n"
     "  [-I|--icon-size] PIXELS - render volume notification icon size to be PIXELS pixels big.\n"
+    "  -- [+|-]VAL\n"
+    "    if stray positional arg starts with \"+\" increase by VAL -> +5 is current volume + 5\n"
+    "    if stray positional arg starts with \"-\" decrease by VAL -> -7 is current volume - 7\n"
+    "    set absolute VAL if neither \"+\" or \"-\" are present -> 50 sets volume to 50\n"
     ,
     argv[0],
     XRESOURCE_KEY_ICON_PRIMARY_COLOR,
     XRESOURCE_KEY_ICON_SECONDARY_COLOR
-);
+  );
   exit(EXIT_FAILURE);
 }
 
@@ -57,15 +62,15 @@ static bool parse_volume_argument(char *optarg, userdata_t *userdata) {
 
 
 int main(int argc, char *argv[]) {
-  userdata_t userdata = { .volume               = -1,
-                          .new_volume           = -1,
-                          .volume_delta         = false,
-                          .mute                 = MUTE_UNKNOWN,
-                          .notification_timeout = DEFAULT_NOTIFICATION_TIMEOUT,
-                          .notification_body    = (char*)"",
-                          .icon_primary_color   = NULL,
-                          .icon_secondary_color = NULL,
-                          .icon_size            = DEFAULT_ICON_SIZE };
+  userdata_t userdata = {.volume               = -1,
+                         .new_volume           = -1,
+                         .volume_delta         = false,
+                         .mute                 = MUTE_UNKNOWN,
+                         .notification_timeout = DEFAULT_NOTIFICATION_TIMEOUT,
+                         .notification_body    = (char*)"",
+                         .icon_primary_color   = NULL,
+                         .icon_secondary_color = NULL,
+                         .icon_size            = DEFAULT_ICON_SIZE};
   bool process_mutex = true;
 
 
@@ -181,11 +186,11 @@ int main(int argc, char *argv[]) {
   }
 
   char *default_sink_name[256];
-  wait_loop(pa_context_get_server_info(context, get_server_info_callback, &default_sink_name));
-  wait_loop(pa_context_get_sink_info_by_name( context,
-                                              (char *) default_sink_name,
-                                              set_volume_callback,
-                                              &userdata ) );
+  pa_wait_loop(pa_context_get_server_info(context, callback__get_server_info, &default_sink_name));
+  pa_wait_loop(pa_context_get_sink_info_by_name(context,
+                                                (char *) default_sink_name,
+                                                callback__set_volume,
+                                                &userdata ));;
   display_volume_notification(&userdata);
 
   process_mutex_unlock();
